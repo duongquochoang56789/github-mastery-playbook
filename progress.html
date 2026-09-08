@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan tiến độ - GitHub Mastery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+            --text:#e6edf3;--text2:#8b949e;--text3:#5c6770;
+            --accent:#58a6ff;--purple:#bc8cff;--pink:#f778ba;
+            --green:#3fb950;--red:#f85149;--orange:#d29922;--cyan:#39d2c0;
+            --gradient:linear-gradient(135deg,#58a6ff,#bc8cff,#f778ba);
+        }
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;gap:1.5rem;flex-wrap:wrap}
+        .nav a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav a:hover{color:var(--text)}
+        .nav .spacer{flex:1}
+        .nav .logo{font-size:1.2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);background:rgba(88,166,255,.1);color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .3s}
+        .nav .btn:hover{background:var(--accent);color:#000}
+
+        main{margin-top:60px;padding:2rem;max-width:1000px;margin-left:auto;margin-right:auto}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .page-head{text-align:center;padding:1.5rem 0 2rem}
+        .page-head h1{font-size:2.4rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.6rem}
+        .page-head p{color:var(--text2)}
+
+        /* Overall ring */
+        .overall{display:flex;align-items:center;justify-content:center;gap:2.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:1.5rem;flex-wrap:wrap}
+        .overall-ring{width:160px;height:160px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .overall-ring::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--bg3) 0);mask:radial-gradient(farthest-side,transparent calc(100% - 16px),#000 calc(100% - 16px));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 16px),#000 calc(100% - 16px))}
+        .overall-ring .num{font-size:2.2rem;font-weight:900}
+        .overall-ring .pct{font-size:.85rem;color:var(--text2)}
+        .overall-info{display:flex;flex-direction:column;gap:.4rem}
+        .overall-info .oi-label{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px}
+        .overall-info .oi-title{font-size:1.4rem;font-weight:800}
+        .overall-info .oi-sub{color:var(--text2);font-size:.9rem;max-width:360px}
+        .overall-info .oi-degrees{display:flex;gap:.8rem;margin-top:.5rem;flex-wrap:wrap}
+        .degree{display:flex;align-items:center;gap:.4rem;font-size:.8rem;padding:.35rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--bg3)}
+        .degree .d-dot{width:9px;height:9px;border-radius:50%}
+
+        /* Stat cards */
+        .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+        @media(max-width:800px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+        .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.2rem;display:flex;gap:.9rem;align-items:center;cursor:pointer;transition:all .3s}
+        .stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+        .stat-card .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;background:var(--bg3)}
+        .stat-card .info{flex:1;min-width:0}
+        .stat-card .val{font-size:1.4rem;font-weight:800;line-height:1.2}
+        .stat-card .lbl{font-size:.72rem;color:var(--text2)}
+        .stat-card .go{color:var(--text3);flex-shrink:0}
+
+        /* Section cards */
+        .section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.2rem}
+        .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem}
+        .section-title{display:flex;align-items:center;gap:.6rem;font-size:1.05rem;font-weight:700}
+        .section-title .sec-ic{font-size:1.2rem}
+        .section .sec-percent{font-size:.85rem;font-weight:700;color:var(--accent)}
+        .sec-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:1rem}
+        .sec-bar .fill{height:100%;background:var(--gradient);border-radius:4px;transition:width .6s}
+
+        .mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem}
+        .mini-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:.82rem}
+        .mini-item .mi-status{font-size:.9rem;flex-shrink:0}
+        .mini-item .mi-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mini-item .mi-val{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text2)}
+
+        .module-link{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--accent);text-decoration:none;padding:.4rem 1rem;border:1px solid var(--accent);border-radius:8px;transition:all .3s}
+        .module-link:hover{background:rgba(88,166,255,.12)}
+
+        .footer{text-align:center;padding:2rem;color:var(--text2);font-size:.78rem;border-top:1px solid var(--border);margin-top:2rem}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="logo">📊 GitHub Mastery</span>
+    <a href="index.html">Trang chủ</a>
+    <a href="guide.html" style="color:var(--orange)">🧭 Lộ trình</a>
+    <a href="flashcards.html">Flashcard</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="deploy.html">Deploy</a>
+    <a href="hub.html" style="color:var(--accent)">🏠 Hub</a>
+    <div class="spacer"></div>
+    <button class="btn" onclick="resetAll()" style="border-color:var(--red);color:var(--red);background:rgba(248,81,73,.08)">🔄 Reset tiến độ</button>
+</nav>
+
+<main>
+    <div class="page-head">
+        <h1>Tổng quan tiến độ học</h1>
+        <p>Tự động tổng hợp từ 6 mô-đun: Lộ trình, Flashcards, Kế hoạch 7 ngày, Quiz, Luyện gõ và Deploy</p>
+    </div>
+
+    <!-- OVERALL -->
+    <div class="overall">
+        <div class="overall-ring" id="overallRing" style="--p:0">
+            <div style="text-align:center">
+                <div class="num" id="overallNum">0%</div>
+                <div class="pct">hoàn thành</div>
+            </div>
+        </div>
+        <div class="overall-info">
+            <div class="oi-label">Trình độ hiện tại</div>
+            <div class="oi-title" id="overallTitle">🌱 Người mới bắt đầu</div>
+            <div class="oi-sub" id="overallSub">Hãy hoàn thành flashcards và quiz để nâng trình độ!</div>
+            <div class="oi-degrees" id="degreeRow"></div>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="cards-grid">
+        <div class="stat-card" onclick="location.href='flashcards.html'">
+            <div class="ic">🃏</div>
+            <div class="info"><div class="val" id="stFlash">0%</div><div class="lbl">Flashcards</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='flashcards.html#plan'">
+            <div class="ic">🗓️</div>
+            <div class="info"><div class="val" id="stPlan">0/42</div><div class="lbl">Kế hoạch bài tập</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='quiz.html'">
+            <div class="ic">📝</div>
+            <div class="info"><div class="val" id="stQuiz">-</div><div class="lbl">Quiz điểm TB</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='index.html#dashboard'">
+            <div class="ic">🎯</div>
+            <div class="info"><div class="val" id="stPrac">0/5</div><div class="lbl">Bài luyện gõ</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='deploy.html'">
+            <div class="ic">🚀</div>
+            <div class="info"><div class="val" id="stDeploy">0/14</div><div class="lbl">Bước deploy</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='guide.html'">
+            <div class="ic">🧭</div>
+            <div class="info"><div class="val" id="stGuide">0/8</div><div class="lbl">Bước lộ trình</div></div>
+            <div class="go">›</div>
+        </div>
+        <div class="stat-card" onclick="location.href='chat.html'">
+            <div class="ic">💬</div>
+            <div class="info"><div class="val" id="stChat">0</div><div class="lbl">Lần hỏi AI</div></div>
+            <div class="go">›</div>
+        </div>
+    </div>
+
+    <!-- FLASHCARD DETAIL -->
+    <div class="section" id="secFlashcard">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">🃏</span> Flashcards học tập</div>
+            <span class="sec-percent" id="fcPercent">0%</span>
+        </div>
+        <div class="sec-bar"><div class="fill" id="fcBar" style="width:0%"></div></div>
+        <div class="mini-grid" id="fcDecks"></div>
+    </div>
+
+    <!-- PLAN DETAIL -->
+    <div class="section" id="secPlan">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">🗓️</span> Kế hoạch 7 ngày</div>
+            <span class="sec-percent" id="planPercent">0%</span>
+        </div>
+        <div class="sec-bar"><div class="fill" id="planBar" style="width:0%"></div></div>
+        <div class="mini-grid" id="planDays"></div>
+    </div>
+
+    <!-- QUIZ DETAIL -->
+    <div class="section" id="secQuiz">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">📝</span> Quiz kiểm tra</div>
+            <a class="module-link" href="quiz.html">Làm quiz ➜</a>
+        </div>
+        <div class="mini-grid" id="quizDecks"></div>
+        <div style="margin-top:1rem;text-align:center;color:var(--text2);font-size:.82rem" id="quizTip">💡 Làm quiz mỗi chủ đề để ghi nhận điểm cao nhất</div>
+    </div>
+
+    <!-- PRACTICE DETAIL -->
+    <div class="section" id="secPractice">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">🎯</span> Luyện gõ thực chiến</div>
+            <a class="module-link" href="index.html#dashboard">Luyện ngay ➜</a>
+        </div>
+        <div class="sec-bar"><div class="fill" id="pracBar" style="width:0%"></div></div>
+        <div class="mini-grid" id="pracLessons"></div>
+    </div>
+
+    <!-- DEPLOY DETAIL -->
+    <div class="section" id="secDeploy">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">🚀</span> Checklist triển khai thật</div>
+            <a class="module-link" href="deploy.html">Thực hành ➜</a>
+        </div>
+        <div class="sec-bar"><div class="fill" id="deployBar" style="width:0%"></div></div>
+        <div class="mini-grid" id="deployPhases"></div>
+    </div>
+
+    <!-- GUIDE DETAIL -->
+    <div class="section" id="secGuide">
+        <div class="section-head">
+            <div class="section-title"><span class="sec-ic">🧭</span> Lộ trình cho người mới</div>
+            <a class="module-link" href="guide.html">Mở lộ trình ➜</a>
+        </div>
+        <div class="sec-bar"><div class="fill" id="guideBar" style="width:0%"></div></div>
+        <div class="mini-grid" id="guideSteps"></div>
+    </div>
+
+</main>
+
+<footer class="footer">GitHub Mastery Progress Tracker • Cập nhật thời gian thực từ localStorage</footer>
+
+<script>
+// ===========================
+// UTIL
+// ===========================
+function readJSON(key,fallback){
+    try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}
+}
+
+// ===========================
+// COLLECT DATA
+// ===========================
+function collect(){
+    // --- Flashcards ---
+    const fcProgress=readJSON('fc_progress',{});
+    const totalCards=fcsTotal(); // compute from known deck structure
+    let learned=0,review=0;
+    const deckNames=['Khái niệm','Lệnh Git','GitHub CLI','Actions & CI','Quy trình'];
+    const decks=[
+        {n:'Khái niệm',icon:'🧠',learned:0,total:10},
+        {n:'Lệnh Git',icon:'⌨️',learned:0,total:12},
+        {n:'GitHub CLI',icon:'🐙',learned:0,total:12},
+        {n:'Actions & CI',icon:'🤖',learned:0,total:8},
+        {n:'Quy trình',icon:'🛡️',learned:0,total:8},
+    ];
+    Object.keys(fcProgress).forEach(k=>{
+        const parts=k.split('_');
+        const di=parseInt(parts[0]);
+        const p=fcProgress[k];
+        if(p&&p.ease>0){
+            if(di<decks.length)decks[di].learned++;
+            learned++;
+        }
+    });
+    const totalCardsSum=decks.reduce((s,d)=>s+d.total,0);
+    const fcPct=totalCardsSum?Math.round(learned/totalCardsSum*100):0;
+
+    // --- Plan ---
+    const planTasks=readJSON('fc_plan_tasks',{});
+    // 7 days x 6 tasks = 42
+    const planTotal=42;
+    let planDone=0;
+    const planDays=[];
+    const dayNames=['Ngày 1','Ngày 2','Ngày 3','Ngày 4','Ngày 5','Ngày 6','Ngày 7'];
+    const dayIcons=['🧭','⌨️','📋','🔀','🤖','🚀','🎨'];
+    for(let i=0;i<7;i++){
+        const t=planTasks[i]||[];
+        const done=t.filter(Boolean).length;
+        const total=t.length||6;
+        planDone+=done;
+        planDays.push({name:dayNames[i],icon:dayIcons[i],done,total,pct:Math.round(done/total*100)});
+    }
+    const planPct=Math.round(planDone/planTotal*100);
+
+    // --- Quiz ---
+    const quizBest=readJSON('quiz_best',{});
+    const quizNames=['Git cơ bản','GitHub CLI','Issue & PR','Actions & CI','Quy trình'];
+    const quizIcons=['⌨️','🐙','🔀','🤖','🛡️'];
+    let quizTotal=0,quizSum=0;
+    const quizArr=quizNames.map((n,i)=>{
+        const b=quizBest[i];
+        if(b!==undefined){quizTotal++;quizSum+=b;}
+        return {name:n,icon:quizIcons[i],best:b!==undefined?b:null};
+    });
+    const quizAvg=quizTotal?Math.round(quizSum/quizTotal):null;
+    const quizPct=quizTotal?Math.round(quizSum/(quizTotal*100)*100):0;
+
+    // --- Chat ---
+    const chatHistory=readJSON('gh_chat_history',[]);
+    let chatCount=0;
+    try{chatCount=Math.ceil(chatHistory.length/2);}catch(e){}
+    // Also merge full-page convs
+    const convs=readJSON('gh_convs',[]);
+    if(Array.isArray(convs)&&convs.length){
+        chatCount+=convs.reduce((s,c)=>s+(c.messages?Math.ceil(c.messages.filter(m=>m.role==='user').length):0),0);
+    }
+
+    // --- Practice (Luyện gõ) ---
+    const practice=readJSON('gh_practice',{});
+    const pracLessons=[
+        {n:'Git cơ bản',icon:'⌨️',done:false},
+        {n:'Branch & Merge',icon:'🔀',done:false},
+        {n:'GitHub CLI',icon:'🐙',done:false},
+        {n:'Pull Request',icon:'📬',done:false},
+        {n:'Actions & Release',icon:'🤖',done:false},
+    ];
+    let pracDone=0;
+    pracLessons.forEach((l,i)=>{
+        const p=practice[i+1];
+        if(p&&p.completed){l.done=true;pracDone++;}
+    });
+    const pracPct=Math.round(pracDone/5*100);
+
+    // --- Deploy ---
+    const deployTasks=readJSON('gh_deploy_tasks',{});
+    const deployPhaseNames=['Cơ bản','CI/CD','Security','Hoàn thiện'];
+    const deployPhases=[
+        {n:'Cơ bản & Setup',icon:'🛠️',done:0,total:6},
+        {n:'CI/CD tự động',icon:'🤖',done:0,total:4},
+        {n:'Security & Hoàn thiện',icon:'🔒',done:0,total:4},
+    ];
+    let deployDone=0;
+    // Map check indices: 0-5 phase1 (6 mục), 6-9 phase2 (CI items 5,6,8,9 -> recheck), simpler: split 14 evenly by index
+    for(let i=0;i<14;i++){
+        if(deployTasks[i]){deployDone++;
+            const idx=i<6?0:(i<10?1:2);
+            deployPhases[idx].done++;
+        }
+    }
+    const deployTotal=14;
+    const deployPct=Math.round(deployDone/deployTotal*100);
+
+    // --- Guide (Lộ trình) ---
+    const guideNames=['Hub','Playbook','Terminal','Luyện gõ','Flashcard','Quiz','Chat AI','Deploy'];
+    const guideIcons=['🏠','🧭','💻','🎯','🃏','📝','💬','🚀'];
+    const guideManual=readJSON('gh_guide_tasks',{});
+    const guideSteps=[];let guideDone=0;
+    for(let i=0;i<8;i++){
+        let ad=false;
+        const auto={1:'gh_practice',2:'fc_progress',3:'quiz_best',5:'gh_chat_history',7:'gh_deploy_tasks'}[i];
+        if(auto){
+            const data=readJSON(auto,{});
+            if(auto==='gh_practice')ad=data&&Object.keys(data).some(k=>data[k]&&data[k].completed);
+            else if(auto==='gh_chat_history'){const c=readJSON('gh_convs',[]);ad=(Array.isArray(data)&&data.length>0)||(Array.isArray(c)&&c.some(x=>x.messages&&x.messages.some(m=>m.role==='user')));}
+            else ad=data&&Object.keys(data).length>0;
+        }
+        const done=ad||!!guideManual[i];
+        if(done)guideDone++;
+        guideSteps.push({n:guideNames[i],icon:guideIcons[i],done});
+    }
+    const guidePct=Math.round(guideDone/8*100);
+
+    return {fcPct,learned,totalCardsSum,decks,planDone,planTotal,planPct,planDays,quizAvg,quizArr,quizTotal,chatCount,quizPct,
+        pracLessons,pracDone,pracPct,deployPhases,deployDone,deployTotal,deployPct,
+        guideSteps,guideDone,guidePct};
+}
+
+// Hardcode fallback counts (same as flashcards.html decks)
+function fcsTotal(){
+    return 50;
+}
+
+// ===========================
+// RENDER
+// ===========================
+function render(data){
+    // Overall: weighted score (6 modules)
+    const overall=Math.round((data.fcPct+data.planPct+data.quizPct+data.pracPct+data.deployPct+data.guidePct)/6);
+    document.getElementById('overallRing').style.setProperty('--p',overall);
+    document.getElementById('overallNum').textContent=overall+'%';
+
+    // Degree
+    let title,sub,dots;
+    if(overall>=85){title='👑 Bậc thầy GitHub';sub='Bạn đã nắm vững toàn bộ. Hãy chia sẻ và giúp người khác!';}
+    else if(overall>=65){title='🚀 Thành thạo';sub='Rất giỏi! Tiếp tục làm quiz còn thiếu để đạt tuyệt đối.';}
+    else if(overall>=40){title='📖 Khá vững';sub='Đang tiến bộ tốt. Ôn thêm flashcards và làm quiz.';}
+    else if(overall>=15){title='🌱 Người mới bắt đầu';sub='Đang trên đường. Hoàn thành flashcards và kế hoạch từng ngày.';}
+    else{title='✨ Khởi đầu';sub='Hãy bắt đầu từ Flashcards và Kế hoạch ngày 1 nhé!';}
+    document.getElementById('overallTitle').textContent=title;
+    document.getElementById('overallSub').textContent=sub;
+
+    // Degree row (badges)
+    const degrees=[
+        {label:'Quiz',val:data.quizAvg!==null?data.quizAvg+'%':'-',color:data.quizAvg!==null?(data.quizAvg>=70?'var(--green)':'var(--orange)'):'var(--text3)'},
+        {label:'Flash',val:data.fcPct+'%',color:data.fcPct>=70?'var(--green)':'var(--orange)'},
+        {label:'Plan',val:data.planPct+'%',color:data.planPct>=70?'var(--green)':'var(--orange)'},
+        {label:'Practice',val:data.pracPct+'%',color:data.pracPct>=70?'var(--green)':'var(--orange)'},
+        {label:'Deploy',val:data.deployPct+'%',color:data.deployPct>=70?'var(--green)':'var(--orange)'},
+        {label:'Guide',val:data.guidePct+'%',color:data.guidePct>=70?'var(--green)':'var(--orange)'},
+    ];
+    document.getElementById('degreeRow').innerHTML=degrees.map(d=>
+        `<span class="degree"><span class="d-dot" style="background:${d.color}"></span>${d.label}: ${d.val}</span>`).join('');
+
+    // Stat cards
+    document.getElementById('stFlash').textContent=data.fcPct+'%';
+    document.getElementById('stPlan').textContent=data.planDone+'/'+data.planTotal;
+    document.getElementById('stQuiz').textContent=(data.quizAvg!==null?data.quizAvg+'%':'—');
+    document.getElementById('stPrac').textContent=data.pracDone+'/5';
+    document.getElementById('stDeploy').textContent=data.deployDone+'/'+data.deployTotal;
+    document.getElementById('stGuide').textContent=data.guideDone+'/8';
+    document.getElementById('stChat').textContent=data.chatCount;
+
+    // Flashcards detail
+    document.getElementById('fcPercent').textContent=data.learned+'/'+data.totalCardsSum+' thẻ • '+data.fcPct+'%';
+    document.getElementById('fcBar').style.width=data.fcPct+'%';
+    document.getElementById('fcDecks').innerHTML=data.decks.map(d=>`
+        <div class="mini-item"><span class="mi-status">${d.icon}</span>
+        <span class="mi-text">${d.n}</span><span class="mi-val">${d.learned}/${d.total}</span></div>`).join('')+
+        `<a class="mini-item" href="flashcards.html" style="text-decoration:none"><span class="mi-status">🃏</span><span class="mi-text" style="color:var(--accent)">Học tiếp</span><span class="mi-val">›</span></a>`;
+
+    // Plan detail
+    document.getElementById('planPercent').textContent=data.planDone+'/'+data.planTotal+' bài • '+data.planPct+'%';
+    document.getElementById('planBar').style.width=data.planPct+'%';
+    document.getElementById('planDays').innerHTML=data.planDays.map(d=>`
+        <div class="mini-item"><span class="mi-status">${d.pct===100?'✅':'⏳'}</span>
+        <span class="mi-text">${d.icon} ${d.name}</span><span class="mi-val">${d.done}/${d.total}</span></div>`).join('');
+
+    // Quiz detail
+    document.getElementById('quizDecks').innerHTML=data.quizArr.map(a=>`
+        <div class="mini-item"><span class="mi-status">${a.icon}</span>
+        <span class="mi-text">${a.name}</span>
+        <span class="mi-val">${a.best!==null?a.best+'%':'—'}</span></div>`).join('')+
+        `<a class="mini-item" href="quiz.html" style="text-decoration:none"><span class="mi-status">📝</span><span class="mi-text" style="color:var(--accent)">Làm quiz</span><span class="mi-val">›</span></a>`;
+    if(data.quizTotal===0){
+        document.getElementById('quizTip').textContent='💡 Chưa làm quiz nào. Mở quiz.html để bắt đầu!';
+    }
+
+    // Practice detail
+    document.getElementById('pracBar').style.width=data.pracPct+'%';
+    document.getElementById('pracLessons').innerHTML=data.pracLessons.map(l=>`
+        <div class="mini-item"><span class="mi-status">${l.done?'✅':'🎯'}</span>
+        <span class="mi-text">${l.icon} ${l.n}</span>
+        <span class="mi-val">${l.done?'Hoàn thành':'Chưa làm'}</span></div>`).join('')+
+        `<a class="mini-item" href="index.html#dashboard" style="text-decoration:none"><span class="mi-status">🎯</span><span class="mi-text" style="color:var(--accent)">Vào luyện gõ</span><span class="mi-val">›</span></a>`;
+
+    // Deploy detail
+    document.getElementById('deployBar').style.width=data.deployPct+'%';
+    document.getElementById('deployPhases').innerHTML=data.deployPhases.map(p=>`
+        <div class="mini-item"><span class="mi-status">${p.done===p.total?'✅':'🚀'}</span>
+        <span class="mi-text">${p.icon} ${p.n}</span>
+        <span class="mi-val">${p.done}/${p.total}</span></div>`).join('')+
+        `<a class="mini-item" href="deploy.html" style="text-decoration:none"><span class="mi-status">🚀</span><span class="mi-text" style="color:var(--accent)">Mở checklist</span><span class="mi-val">›</span></a>`;
+
+    // Guide detail
+    document.getElementById('guideBar').style.width=data.guidePct+'%';
+    document.getElementById('guideSteps').innerHTML=data.guideSteps.map(s=>`
+        <div class="mini-item"><span class="mi-status">${s.done?'✅':'🧭'}</span>
+        <span class="mi-text">${s.icon} ${s.n}</span>
+        <span class="mi-val">${s.done?'Xong':'Chờ'}</span></div>`).join('')+
+        `<a class="mini-item" href="guide.html" style="text-decoration:none"><span class="mi-status">🧭</span><span class="mi-text" style="color:var(--accent)">Mở lộ trình</span><span class="mi-val">›</span></a>`;
+}
+
+// ===========================
+// RESET ALL
+// ===========================
+function resetAll(){
+    if(!confirm('Xóa toàn bộ tiến độ học tập (flashcards, plan, quiz, luyện gõ, deploy, lộ trình, chứng chỉ)? Chat và cài đặt được giữ lại.'))return;
+    ['fc_progress','fc_plan_tasks','quiz_best','gh_practice','gh_deploy_tasks','gh_guide_tasks','gh_cert_name'].forEach(k=>localStorage.removeItem(k));
+    render(collect());
+    location.reload();
+}
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded',()=>{
+    render(collect());
+});
+</script>
+</body>
+</html>

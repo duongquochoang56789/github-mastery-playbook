@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧭 Lộ trình cho người mới - GitHub Mastery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+            --text:#e6edf3;--text2:#8b949e;--text3:#5c6770;
+            --accent:#58a6ff;--purple:#bc8cff;--pink:#f778ba;
+            --green:#3fb950;--red:#f85149;--orange:#d29922;--cyan:#39d2c0;
+            --gradient:linear-gradient(135deg,#58a6ff,#bc8cff,#f778ba);
+        }
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.7}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;gap:1.2rem;flex-wrap:wrap}
+        .nav a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav a:hover{color:var(--text)}
+        .nav a.on{color:var(--accent)}
+        .nav .spacer{flex:1}
+        .nav .logo{font-size:1.2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);background:rgba(88,166,255,.1);color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .3s}
+        .nav .btn:hover{background:var(--accent);color:#000}
+
+        main{margin-top:60px;padding:2rem;max-width:900px;margin-left:auto;margin-right:auto}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        .hero{text-align:center;padding:1rem 0 2rem}
+        .hero h1{font-size:2.4rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.6rem}
+        .hero p{color:var(--text2);max-width:640px;margin:0 auto}
+
+        /* progress strip */
+        .strip{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;animation:fadeUp .4s ease}
+        .strip-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+        .strip .s-label{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap}
+        .strip .s-bar{flex:1;min-width:160px;height:10px;background:var(--bg3);border-radius:5px;overflow:hidden}
+        .strip .s-fill{height:100%;background:var(--gradient);border-radius:5px;transition:width .5s}
+        .strip .s-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--accent);white-space:nowrap}
+        .strip .s-sub{width:100%;color:var(--text2);font-size:.82rem}
+
+        /* steps */
+        .step{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.3rem 1.4rem;margin-bottom:1rem;animation:fadeUp .4s ease both;position:relative;overflow:hidden}
+        .step.done{opacity:.92}
+        .step.done .st-head .st-badge{color:var(--green);border-color:var(--green)}
+        .step.active-step{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+        .st-head{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;flex-wrap:wrap}
+        .st-badge{width:34px;height:34px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:var(--accent);flex-shrink:0}
+        .st-number{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+        .st-title{font-weight:800;font-size:1.1rem;flex:1;min-width:180px}
+        .st-icon{font-size:1.5rem;flex-shrink:0}
+        .st-status{font-size:.68rem;padding:.25rem .7rem;border-radius:20px;border:1px solid var(--border);color:var(--text2);white-space:nowrap}
+        .st-status.auto{color:var(--cyan);border-color:rgba(57,210,192,.4)}
+        .st-status.manual{color:var(--orange);border-color:rgba(210,153,34,.4)}
+        .st-status.open{color:var(--text3);border-color:var(--border)}
+        .st-desc{color:var(--text2);font-size:.9rem;margin-bottom:.8rem}
+        .st-how{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:.9rem;display:none}
+        .st-how.open{display:block}
+        .st-how h5{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.4rem}
+        .st-how ol{padding-left:1.2rem}
+        .st-how li{font-size:.85rem;color:var(--text2);margin:.2rem 0}
+        .st-actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+        .st-btn{padding:.55rem 1.2rem;border-radius:8px;border:1px solid var(--accent);background:rgba(88,166,255,.1);color:var(--accent);cursor:pointer;font-size:.83rem;font-weight:700;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:.4rem}
+        .st-btn:hover{background:var(--accent);color:#000}
+        .st-btn.ghost{border-color:var(--border);color:var(--text2);background:none}
+        .st-btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+        .st-cb{display:inline-flex;align-items:center;gap:.45rem;font-size:.8rem;color:var(--text2);cursor:pointer;user-select:none}
+        .st-cb input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
+        .st-cb.done{color:var(--green)}
+
+        .advice{background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(188,140,255,.08));border:1px dashed var(--accent);border-radius:14px;padding:1.2rem;font-size:.88rem;color:var(--text2);margin-top:.5rem}
+        .advice ul{padding-left:1.2rem;margin-top:.4rem}
+        .advice li{margin:.2rem 0}
+
+        .footer{text-align:center;padding:2rem;color:var(--text2);font-size:.78rem;border-top:1px solid var(--border);margin-top:2rem}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="logo">🧭 GitHub Mastery</span>
+    <a href="hub.html">🏠 Hub</a>
+    <a href="index.html">Playbook</a>
+    <a href="flashcards.html">Flashcard</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="deploy.html">Deploy</a>
+    <a href="progress.html">Tiến độ</a>
+    <a href="chat.html">Chat AI</a>
+</nav>
+
+<main>
+    <div class="hero">
+        <h1>🧭 Lộ trình cho người mới bắt đầu</h1>
+        <p>8 bước đi từ con số 0 đến một "GitHub Developer" thực thụ. Làm từng bước theo thứ tự — hệ thống tự ghi nhận tiến độ và mở khóa chứng chỉ khi hoàn thành.</p>
+    </div>
+
+    <!-- STRIP -->
+    <div class="strip">
+        <div class="strip-row">
+            <span class="s-label">Tiến độ lộ trình</span>
+            <div class="s-bar"><div class="s-fill" id="stripFill" style="width:0%"></div></div>
+            <span class="s-num" id="stripNum">0/8</span>
+            <button class="st-btn ghost" onclick="nextStep()" style="padding:.35rem .9rem;font-size:.75rem">➤ Bước tiếp theo</button>
+        </div>
+        <div class="s-sub" id="stripSub">Bắt đầu từ Bước 1 bên dưới. Mỗi bước có hướng dẫn chi tiết và nút thực hành ngay.</div>
+    </div>
+
+    <div id="stepsRoot"></div>
+
+    <div class="advice">
+        <strong>💡 Mẹo học hiệu quả:</strong>
+        <ul>
+            <li>Mở 2 cửa sổ: 1 xem hướng dẫn, 1 làm luôn trong module — vừa đọc vừa thực hành.</li>
+            <li>Đừng tra AI trước khi tự thử 3 phút — tự mò ra sẽ nhớ lâu hơn 10 lần.</li>
+            <li>Làm sai là bình thường; git có cách sửa cho mọi thứ. Sợ gì?</li>
+            <li>Mỗi ngày 45–60 phút là đủ để hết lộ trình trong 7–10 ngày.</li>
+        </ul>
+    </div>
+</main>
+
+<footer class="footer">GitHub Mastery — Cẩm nang lộ trình cho người mới</footer>
+
+<script>
+// ===========================
+// STEP DEFINITIONS
+// ===========================
+const STEPS=[
+    {icon:'🏠',title:'Bắt đầu từ Hub',auto:false,url:'hub.html',
+        how:[
+            'Mở Trung tâm Hub — nơi tổng hợp toàn bộ 8 trang của hệ thống.',
+            'Nhìn vòng tròn tiến độ tổng — ban đầu là 0%, việc của bạn là nâng nó lên.',
+            'Đọc tên 6 mô-đun khóa học và hiểu chúng bổ trợ cho nhau.',
+            'Cuộn xuống cuối trang: khu vực Chứng chỉ sẽ bị khóa. Nó mở khi bạn đạt 100%!',
+        ]},
+    {icon:'🧭',title:'Đọc Playbook chính',auto:false,url:'index.html',
+        how:[
+            'Vào "Trang chủ" — hệ thống sắp xếp thành 6 section phía trên.',
+            'Bắt đầu với Từ điển: tra 1 thuật ngữ lạ bất kỳ để quen cách dùng.',
+            'Xem Playbook: các lệnh quan trọng được gom theo mục đích (bắt đầu, commit, branch...).',
+            'Lướt Kịch bản & Checklist để biết đích cuối mình sẽ đạt được.',
+        ]},
+    {icon:'💻',title:'Chạy Terminal mô phỏng',auto:false,url:'index.html#dashboard',
+        how:[
+            'Đi tới section Dashboard trong Playbook chính.',
+            'Chọn kịch bản số 1 "Khởi tạo repo mới" — xem các lệnh tự chạy.',
+            'Thử thay đổi kịch bản: "Phát triển tính năng", "Tạo Pull Request", "GitHub Actions CI/CD".',
+            'Sau đó nhập thử lệnh thật vào ô nhập (VD: gh pr list) và quan sát kết quả giả lập.',
+        ]},
+    {icon:'🎯',title:'Luyện gõ lệnh thực chiến',autoKey:'gh_practice',autoTest:p=>p && Object.keys(p).some(k=>p[k]&&p[k].completed),url:'index.html#dashboard',
+        how:[
+            'Trong Dashboard, bấm tab "Luyện gõ" (thứ 2 từ trái sang).',
+            'Chọn Bài 1: Git cơ bản. Bấm vào ô nhập và gõ chính xác lệnh hiển thị.',
+            'Bắt buộc gõ đúng 100% từng ký tự — sai ở đâu, hệ thống chỉ đúng chỗ đó.',
+            'Cạn ý tưởng thì bấm "Gợi ý ký tự tiếp theo". Hoàn thành 5 lệnh của bài để qua bước.',
+        ]},
+    {icon:'🃏',title:'Flashcard + Kế hoạch 7 ngày',autoKey:'fc_progress',autoTest:f=>f && Object.keys(f).length>0,url:'flashcards.html',
+        how:[
+            'Mở Flashcards. Tab "Kế hoạch 7 ngày" cho bạn lộ trình mỗi ngày.',
+            'Tick hoàn thành ít nhất 1 bài tập ngày 1 để khởi động.',
+            'Sang tab "Thẻ học" — lật thẻ, tự trả lời rồi xem đáp án.',
+            'Đánh giá mức độ nhớ (Again/Hard/Good/Easy) để hệ thống sắp xếp ôn lại đúng lúc.',
+        ]},
+    {icon:'📝',title:'Tự kiểm tra bằng Quiz',autoKey:'quiz_best',autoTest:q=>q && Object.keys(q).length>0,url:'quiz.html',
+        how:[
+            'Mở Quiz. Chọn chủ đề đầu tiên "Git cơ bản".',
+            'Làm bài như trắc nghiệm thật: chọn đáp án, đọc giải thích ngay sau mỗi câu.',
+            'Xem điểm % và phần review câu sai — đó là chỗ cần ôn lại.',
+            'Hệ thống nhớ điểm cao nhất của bạn theo từng chủ đề.',
+        ]},
+    {icon:'💬',title:'Hỏi AI Tutor khi kẹt',autoKey:'gh_chat_history',autoTest:()=>{const h=readJSON('gh_chat_history',[]);const c=readJSON('gh_convs',[]);if(Array.isArray(h)&&h.length>0)return true;if(Array.isArray(c)&&c.some(x=>x.messages&&x.messages.some(m=>m.role==='user')))return true;return false;},url:'chat.html',
+        how:[
+            'Chat AI là người bạn đồng hành — hỏi bất cứ điều gì về Git/GitHub.',
+            'Demo câu hỏi: "Code cuối bị conflict khi merge, xử lý thế nào?"',
+            'Chú ý câu trả lời chảy ra từng chữ (streaming) — bấm ⏹️ để dừng nếu cần.',
+            'Mỗi hội thoại được lưu tự động ở cột trái để xem lại sau.',
+        ]},
+    {icon:'🚀',title:'Deploy thật + Nhận chứng chỉ',autoKey:'gh_deploy_tasks',autoTest:d=>d && Object.keys(d).length>0,url:'deploy.html',
+        how:[
+            'Mở Deploy: đọc bảng so sánh để chọn hạ tầng phù hợp với bạn.',
+            'Đi theo tab "VPS + PM2" hoặc "Docker" — làm là hiểu ngay.',
+            'Tick ít nhất 1 bước trong Checklist triển khai (cuối cùng).',
+            'Quay lại Hub: khi toàn bộ 8 bước + 5 mô-đun đạt 100%, bấm mở Chứng chỉ, ghi tên bạn và In thành PDF!',
+        ]},
+];
+
+// ===========================
+// STATE
+// ===========================
+function readJSON(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
+
+function autoDone(i){
+    const s=STEPS[i];
+    if(!s.autoKey)return false;
+    const data=readJSON(s.autoKey,{});
+    try{return s.autoTest(data);}catch(e){return false;}
+}
+
+function manualState(){
+    return readJSON('gh_guide_tasks',{});
+}
+
+function effective(i){
+    return autoDone(i) || !!manualState()[i];
+}
+
+function saveManual(i,val){
+    const m=manualState();
+    if(val) m[i]=true; else delete m[i];
+    localStorage.setItem('gh_guide_tasks',JSON.stringify(m));
+    renderSteps();
+}
+
+// ===========================
+// RENDER
+// ===========================
+function renderSteps(){
+    const root=document.getElementById('stepsRoot');
+    root.innerHTML='';
+    STEPS.forEach((s,i)=>{
+        const ad=autoDone(i);
+        const done=ad||!!manualState()[i];
+        const auto=!!s.autoKey;
+        const row=document.createElement('div');
+        row.className='step'+(done?' done':'');
+        row.id='step-'+i;
+        row.style.animationDelay=(i*0.06)+'s';
+        row.innerHTML=`
+            <div class="st-head">
+                <div class="st-badge">${i+1}</div>
+                <span class="st-icon">${s.icon}</span>
+                <span class="st-title">${s.title}</span>
+                <span class="st-status ${ad?'auto':(auto?'manual':'open')}">${ad?'✅ Tự nhận diện xong':(auto?'Làm xong thì nhận diện tự động':'Chưa làm')}</span>
+            </div>
+            <div class="st-desc" style="color:var(--text2);font-size:.9rem">
+                <label class="st-cb ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="saveManual(${i},this.checked)"> Tôi đã hoàn thành bước này</label>
+            </div>
+            <div class="st-how">
+                <h5>CÁCH THỰC HÀNH</h5>
+                <ol>${s.how.map(h=>`<li>${h}</li>`).join('')}</ol>
+            </div>
+            <div class="st-actions">
+                <a class="st-btn" href="${s.url}"><span>▶</span> Thực hành ngay: ${s.title}</a>
+                <button class="st-btn ghost" onclick="toggleHow(${i},this)">📖 Xem hướng dẫn chi tiết</button>
+            </div>`;
+        root.appendChild(row);
+    });
+    updateStrip();
+    // scroll to target from hash
+    const m=location.hash.match(/^#step-(\d+)$/);
+    if(m){
+        const el=document.getElementById('step-'+m[1]);
+        if(el){el.classList.add('active-step');setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});},200);}
+    }
+}
+
+function toggleHow(i,btn){
+    const row=document.getElementById('step-'+i);
+    const how=row.querySelector('.st-how');
+    how.classList.toggle('open');
+    btn.textContent=how.classList.contains('open')?'✖ Thu gọn':(STEPS[i].how.length?'📖 Xem hướng dẫn chi tiết':'');
+}
+
+function updateStrip(){
+    const total=STEPS.length;
+    let done=0;
+    STEPS.forEach((_,i)=>{if(effective(i))done++;});
+    const pct=Math.round(done/total*100);
+    document.getElementById('stripFill').style.width=pct+'%';
+    document.getElementById('stripNum').textContent=done+'/'+total;
+    const sub=document.getElementById('stripSub');
+    if(done===0)sub.textContent='Bắt đầu từ Bước 1 bên dưới. Mỗi bước có hướng dẫn chi tiết và nút thực hành ngay.';
+    else if(done<total)sub.textContent=`Đang đi đúng hướng! Hoàn thành nốt ${total-done} bước còn lại. Các bước tự nhận diện sẽ cập nhật khi bạn làm trong module tương ứng.`;
+    else sub.textContent='🎉 Hoàn thành toàn bộ lộ trình! Quay lại Hub để nhận chứng chỉ.';
+}
+
+function nextStep(){
+    for(let i=0;i<STEPS.length;i++){
+        if(!effective(i)){
+            const el=document.getElementById('step-'+i);
+            if(el){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active-step'));el.classList.add('active-step');el.scrollIntoView({behavior:'smooth',block:'center'});}
+            return;
+        }
+    }
+}
+
+document.querySelector('.nav .logo').style.cursor='pointer';
+document.querySelector('.nav .logo').addEventListener('click',()=>location.href='#step-0');
+
+document.addEventListener('DOMContentLoaded',()=>{
+    renderSteps();
+});
+</script>
+</body>
+</html>

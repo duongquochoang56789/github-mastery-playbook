@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Kiểm tra kiến thức GitHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+            --text:#e6edf3;--text2:#8b949e;--text3:#5c6770;
+            --accent:#58a6ff;--purple:#bc8cff;--pink:#f778ba;
+            --green:#3fb950;--red:#f85149;--orange:#d29922;--cyan:#39d2c0;
+            --gradient:linear-gradient(135deg,#58a6ff,#bc8cff,#f778ba);
+        }
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;gap:1.5rem}
+        .nav a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav a:hover{color:var(--text)}
+        .nav .spacer{flex:1}
+        .nav .logo{font-size:1.2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);background:rgba(88,166,255,.1);color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .3s}
+        .nav .btn:hover{background:var(--accent);color:#000}
+
+        main{margin-top:60px;padding:2rem;max-width:1000px;margin-left:auto;margin-right:auto}
+        .page-head{text-align:center;padding:1.5rem 0 2rem}
+        .page-head h1{font-size:2.4rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.6rem}
+        .page-head p{color:var(--text2)}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+        .panel{display:none;animation:fadeUp .4s ease}
+        .panel.active{display:block}
+
+        /* ===== DECK SELECT ===== */
+        .deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:1.5rem}
+        .deck-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.4rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+        .deck-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 30px rgba(88,166,255,.12)}
+        .deck-card .dc-ic{font-size:2.2rem;margin-bottom:.6rem}
+        .deck-card .dc-title{font-weight:700;font-size:.95rem;margin-bottom:.3rem}
+        .deck-card .dc-count{font-size:.75rem;color:var(--text2);margin-bottom:.6rem}
+        .deck-card .dc-best{display:inline-block;font-size:.7rem;padding:.2rem .8rem;border-radius:10px;font-weight:600}
+        .deck-card .dc-best.none{background:var(--bg3);color:var(--text2)}
+        .deck-card .dc-best.good{background:rgba(63,185,80,.12);color:var(--green)}
+        .free-badge{position:absolute;top:.7rem;right:.7rem;font-size:.68rem;background:rgba(188,140,255,.15);color:var(--purple);padding:.15rem .6rem;border-radius:8px;font-weight:600}
+
+        /* ===== QUIZ ===== */
+        .quiz-top{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:space-between}
+        .quiz-topic{display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.95rem}
+        .quiz-topic .q-back{font-size:.85rem;color:var(--text2);cursor:pointer;padding:.3rem .7rem;border-radius:8px;border:1px solid var(--border);background:var(--bg2);transition:all .3s}
+        .quiz-topic .q-back:hover{color:var(--text);border-color:var(--accent)}
+        .quiz-progress-info{display:flex;align-items:center;gap:1rem;font-size:.85rem;color:var(--text2)}
+        .quiz-progress-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;min-width:120px}
+        .quiz-progress-track .fill{height:100%;background:var(--gradient);transition:width .4s;border-radius:4px}
+        .quiz-timer{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent)}
+        .quiz-timer.warn{color:var(--red)}
+
+        .question-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.6rem;animation:fadeUp .3s ease}
+        .q-num{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.5rem}
+        .q-text{font-size:1.1rem;font-weight:600;margin-bottom:1.4rem;line-height:1.6}
+        .q-options{display:flex;flex-direction:column;gap:.6rem}
+        .q-opt{padding:.9rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .3s;font-size:.95rem;display:flex;align-items:flex-start;gap:.8rem}
+        .q-opt:hover{border-color:var(--accent);background:rgba(88,166,255,.05)}
+        .q-opt .label{width:28px;height:28px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0;transition:all .3s}
+        .q-opt.correct{border-color:var(--green);background:rgba(63,185,80,.1)}
+        .q-opt.correct .label{background:var(--green);color:#000;border-color:var(--green)}
+        .q-opt.wrong{border-color:var(--red);background:rgba(248,81,73,.1)}
+        .q-opt.wrong .label{background:var(--red);color:#000;border-color:var(--red)}
+        .q-opt.disabled{pointer-events:none;opacity:.85}
+        .q-feedback{margin-top:1rem;padding:.9rem 1.1rem;border-radius:10px;font-size:.9rem;display:none;animation:fadeUp .3s}
+        .q-feedback.show{display:block}
+        .q-feedback.correct{background:rgba(63,185,80,.1);border-left:3px solid var(--green)}
+        .q-feedback.wrong{background:rgba(248,81,73,.1);border-left:3px solid var(--red)}
+        .q-feedback .explain{margin-top:.4rem;color:var(--text2);font-size:.85rem}
+        .q-feedback .explain code{background:var(--bg);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.82em;color:var(--green)}
+
+        .quiz-nav{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.2rem}
+        .btn-next{padding:.7rem 1.8rem;border-radius:12px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:.9rem;font-weight:700;transition:all .3s;display:flex;align-items:center;gap:.5rem}
+        .btn-next:hover{filter:brightness(1.1)}
+        .btn-next:disabled{opacity:.4;cursor:not-allowed}
+
+        /* ===== RESULT ===== */
+        .result-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;animation:pop .4s}
+        .result-score-circle{width:160px;height:160px;border-radius:50%;margin:1.5rem auto;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+        .result-score-circle::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--score)*1%), var(--bg3) 0);mask:radial-gradient(farthest-side,transparent calc(100% - 14px),#000 calc(100% - 14px));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 14px),#000 calc(100% - 14px))}
+        .result-score-circle .num{font-size:2.6rem;font-weight:900}
+        .result-score-circle .lbl{font-size:.75rem;color:var(--text2)}
+        .result-msg{font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+        .result-msg span{font-size:1.8rem;display:block;margin-bottom:.3rem}
+        .result-sub{color:var(--text2);margin-bottom:1.5rem}
+        .result-buttons{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
+        .rb{padding:.7rem 1.5rem;border-radius:12px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:all .3s;display:flex;align-items:center;gap:.4rem}
+        .rb.primary{background:var(--accent);color:#000}
+        .rb.ghost{background:var(--bg3);border:1px solid var(--border);color:var(--text)}
+        .rb:hover{filter:brightness(1.1);transform:translateY(-2px)}
+
+        .review-section{margin-top:2rem;text-align:left}
+        .review-section h3{font-size:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+        .review-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:.8rem}
+        .review-item .rq{font-weight:600;font-size:.95rem;margin-bottom:.7rem}
+        .review-item .ra{font-size:.9rem;padding:.6rem .9rem;border-radius:8px;margin-bottom:.3rem}
+        .review-item .ra.your-wrong{background:rgba(248,81,73,.08);border-left:3px solid var(--red)}
+        .review-item .ra.your-correct{background:rgba(63,185,80,.08);border-left:3px solid var(--green)}
+        .review-item .ra .tag{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-right:.4rem}
+        .review-item .explain{font-size:.82rem;color:var(--text2);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+        .review-item .explain code{background:var(--bg);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.85em}
+
+        .footer{text-align:center;padding:2rem;color:var(--text2);font-size:.78rem;border-top:1px solid var(--border);margin-top:2rem}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="logo">📝 GitHub Mastery</span>
+    <a href="guide.html" style="color:var(--orange)">🧭 Lộ trình</a>
+    <a href="index.html">Trang chủ</a>
+    <a href="flashcards.html">Flashcard</a>
+    <a href="deploy.html">Deploy</a>
+    <a href="progress.html">Tiến độ</a>
+    <div class="spacer"></div>
+    <a class="btn" href="hub.html">🏠 Hub</a>
+</nav>
+
+<main>
+    <div class="page-head">
+        <h1>Quiz Kiểm Tra Kiến Thức</h1>
+        <p>Chọn chủ đề, trả lời câu hỏi và xem giải thích chi tiết sau mỗi câu</p>
+    </div>
+
+    <!-- ===== DECK SELECT ===== -->
+    <div class="panel active" id="panel-decks">
+        <div class="deck-grid" id="deckGrid"></div>
+        <div style="text-align:center;margin-top:2rem;color:var(--text2);font-size:.85rem">
+            💡 Tổng điểm cao nhất được lưu tự động cho mỗi chủ đề
+        </div>
+    </div>
+
+    <!-- ===== QUIZ ===== -->
+    <div class="panel" id="panel-quiz">
+        <div class="quiz-top">
+            <div class="quiz-topic">
+                <span class="q-back" onclick="backToDecks()">← Chủ đề</span>
+                <span id="quizTopicTitle">[topic]</span>
+            </div>
+            <div class="quiz-progress-info">
+                <span id="quizCount">1/10</span>
+                <div class="quiz-progress-track"><div class="fill" id="quizProgress"></div></div>
+                <span class="quiz-timer" id="quizTimer">00:00</span>
+            </div>
+        </div>
+        <div class="question-card" id="questionCard"></div>
+        <div class="quiz-nav">
+            <button class="btn-next" id="btnNext" onclick="nextQ()">Câu tiếp theo ➜</button>
+        </div>
+    </div>
+
+    <!-- ===== RESULT ===== -->
+    <div class="panel" id="panel-result">
+        <div class="result-card" id="resultCard"></div>
+    </div>
+</main>
+
+<footer class="footer">GitHub Mastery Quiz • Dựa trên báo cáo GitHub toàn diện 06/09/2026</footer>
+
+<script>
+// ===========================
+// QUIZ DATA
+// ===========================
+const QUIZ_DECKS=[
+    {
+        name:'Git cơ bản',icon:'⌨️',color:'#3fb950',
+        questions:[
+            {q:'Lệnh nào tải toàn bộ repo từ GitHub về máy?',
+             opts:['git init','git clone https://github.com/owner/repo.git','git pull','git checkout'],
+             ans:1,
+             exp:'git clone tải cả repo về máy. git pull chỉ lấy bản mới nhất từ bản đã clone.'},
+            {q:'Lệnh nào cho biết bạn đang ở nhánh nào?',
+             opts:['git log','git status','git branch','git remote'],
+             ans:2,
+             exp:'git branch liệt kê các nhánh và đánh dấu (*) nhánh đang đứng. git status cũng hiện nhưng git branch rõ hơn.'},
+            {q:'Thứ tự đúng để lưu thay đổi lên GitHub?',
+             opts:['commit → push → add','push → commit → add','add → commit → push','commit → add → pull'],
+             ans:2,
+             exp:'Đúng quy trình: git add (chọn file) → git commit (chụp ảnh) → git push (đẩy lên).'},
+            {q:'git pull origin main dùng để làm gì?',
+             opts:['Đẩy code lên main','Lấy code mới nhất từ main về','Tạo nhánh mới tên main','Xóa nhánh main'],
+             ans:1,
+             exp:'pull = lấy (fetch) + gộp (merge) code mới nhất từ remote origin branch main về máy.'},
+            {q:'"commit -m" nghĩa là gì?',
+             opts:['M (merge) với branch khác','Đính kèm message mô tả','Commit gấp (fast)','Tự động push'],
+             ans:1,
+             exp:'-m cho phép ghi message ngay trên dòng lệnh, vd: git commit -m "fix: sửa lỗi login".'},
+            {q:'git diff để làm gì?',
+             opts:['Xóa file thay đổi','Xem chi tiết khác biệt giữa các dòng thay đổi','So sánh tốc độ mạng','Merge mỗi nhánh'],
+             ans:1,
+             exp:'git diff hiển thị từng dòng thêm (+) / xóa (-) trước khi commit. Tránh lưu nhầm.'},
+            {q:'Lệnh nào tạo nhánh mới VÀ chuyển ngay sang đó?',
+             opts:['git branch feature/x','git checkout -b feature/x','git switch main','git merge feature/x'],
+             ans:1,
+             exp:'git checkout -b vừa tạo (b) vừa chuyển sang nhánh mới. git branch chỉ tạo không chuyển.'},
+            {q:'File .env nên được xử lý thế nào?',
+             opts:['Commit vì cần backup','Thêm vào .gitignore để không commit','Đổi tên thành .public','Push trực tiếp'],
+             ans:1,
+             exp:'.env chứa secret/mật khẩu. Thêm vào .gitignore và dùng biến môi trường để tránh lộ.'},
+        ]
+    },
+    {
+        name:'GitHub CLI',icon:'🐙',color:'#bc8cff',
+        questions:[
+            {q:'Lệnh tạo repo mới từ thư mục hiện tại và push ngay?',
+             opts:['gh repo create my-app --public --source=. --push','git init my-app','gh repo clone my-app','mkdir my-app'],
+             ans:0,
+             exp:'--source=. lấy thư mục hiện tại, --push đẩy code lên GitHub ngay sau khi tạo.'},
+            {q:'Lệnh nào kiểm tra đã đăng nhập GitHub chưa?',
+             opts:['gh login check','gh auth status','gh whoami --force','gh token verify'],
+             ans:1,
+             exp:'gh auth status hiển thị tài khoản đang đăng nhập, token scopes, protocol. Là bước đầu khi mới cài.'},
+            {q:'gh repo fork dùng để làm gì?',
+             opts:['Tạo bản sao repo người khác về tài khoản mình','Xóa repo của người khác','Đổi tên repo','Merge 2 repo'],
+             ans:0,
+             exp:'Fork = "Save copy" trên GitHub. Sau đó bạn sửa và gửi PR đóng góp ngược lại cho tác giả gốc.'},
+            {q:'Lệnh xóa repo (nguy hiểm) cần thêm gì?',
+             opts:['--yes','--confirm','--delete','-f'],
+             ans:1,
+             exp:'gh repo delete owner/repo --confirm là cú pháp chính thức. GitHub bắt bạn xác nhận để tránh xóa nhầm.'},
+            {q:'"gh repo view owner/repo --web" làm gì?',
+             opts:['Xem nội dung repo ở terminal','Mở repo trên trình duyệt web','Chỉnh sửa README','Tạo PR'],
+             ans:1,
+             exp:'--web mở trang GitHub của repo trong trình duyệt, tiện khi cần xem giao diện web.'},
+            {q:'Lệnh nào đăng nhập GitHub CLI?',
+             opts:['gh start','gh auth login','gh connect','git login'],
+             ans:1,
+             exp:'gh auth login hướng dẫn đăng nhập qua browser hoặc token. Điều kiện tiên quyết cho mọi lệnh gh.'},
+        ]
+    },
+    {
+        name:'Issue & PR',icon:'🔀',color:'#f778ba',
+        questions:[
+            {q:'Làm sao để tự động đóng issue khi merge PR?',
+             opts:['Ghi "Closes #123" trong body PR','Nhắn tin cho tác giả','Xóa issue thủ công','Không thể tự đóng'],
+             ans:0,
+             exp:'Khi PR chứa "Closes #123" (hoặc Fixes #123) được merge, GitHub tự động đóng issue #123.'},
+            {q:'Lệnh tạo issue mới với nhãn bug?',
+             opts:['gh issue new bug','gh issue create --title "..." --label bug','git issue --add bug','gh bug report'],
+             ans:1,
+             exp:'gh issue create --title "Bug: Login fails" --label bug tạo issue với nhãn bug. Có thể thêm --assignee @me.'},
+            {q:'Thứ tự đúng của quy trình PR chuẩn?',
+             opts:['Push → commit → branch → PR','Branch → commit → push → PR → merge','PR → branch → merge → push','Merge → branch → PR → commit'],
+             ans:1,
+             exp:'Quy trình chuẩn: tạo nhánh → sửa & commit → push → tạo PR → review → merge. Nhánh main luôn sạch.'},
+            {q:'gh pr merge --squash có tác dụng gì?',
+             opts:['Giữ nguyên nhiều commit','Gom nhiều commit thành 1 commit sạch và merge','Chỉ merge PR của fork','Bắt buộc review'],
+             ans:1,
+             exp:'Squash gom toàn bộ commits của nhánh thành 1 commit duy nhất. Khuyên dùng cho team nhỏ. Thêm --delete-branch để xóa nhánh.'},
+            {q:'"gh pr review 5 --approve --body LGTM!" nghĩa là gì?',
+             opts:['Từ chối PR','Duyệt đồng ý PR số 5 và để lại comment LGTM','Xóa PR số 5','Đang test'],
+             ans:1,
+             exp:'--approve = đồng ý merge. --request-changes = yêu cầu sửa. LGTM = Looks Good To Me.'},
+            {q:'Lệnh xem diff của PR mà không cần mở web?',
+             opts:['gh pr diff 5','gh pr show 5','git diff --pr 5','gh pr log'],
+             ans:0,
+             exp:'gh pr diff <số> hiện khác biệt code trực tiếp trong terminal, rất nhanh khi review.'},
+        ]
+    },
+    {
+        name:'Actions & CI/CD',icon:'🤖',color:'#39d2c0',
+        questions:[
+            {q:'File workflow Actions được đặt ở đâu?',
+             opts:['/src/actions','/workflows/ci.yml','.github/workflows/ci.yml','/deploy/ci.yml'],
+             ans:2,
+             exp:'GitHub Actions tự nhận file YAML trong thư mục .github/workflows/ của repo.'},
+            {q:'Nếu test thất bại trong Actions thì PR sẽ thế nào?',
+             opts:['Vẫn merge bình thường','Hiện dấu đỏ, dễ bị chặn merge (branch protection)','Tự xóa PR','Tự động sửa code'],
+             ans:1,
+             exp:'Actions chạy test trên PR. Nếu fail, hiện ✗ đỏ. Nếu bật branch protection, không merge được.'},
+            {q:'Lệnh xem log lỗi của lần chạy Actions thất bại?',
+             opts:['gh run view 123 --log-failed','gh log 123','gh action log 123','gh run show --all'],
+             ans:0,
+             exp:'gh run view <id> --log-failed chỉ in ra phần log của các job bị fail, tiết kiệm thời gian debug.'},
+            {q:'"runs-on: ubuntu-latest" nghĩa là gì?',
+             opts:['Chạy trên máy Windows','Chạy trên máy ảo Ubuntu mới nhất','Chạy offline','Chạy trên điện thoại'],
+             ans:1,
+             exp:'Mỗi job trong GitHub Actions chạy trên một máy ảo (runner). ubuntu-latest là máy Ubuntu mới nhất.'},
+            {q:'Lệnh chạy lại các job đã fail?',
+             opts:['gh run retry 123','gh run rerun 123 --failed','gh run repeat 123','gh action redo 123'],
+             ans:1,
+             exp:'gh run rerun <id> --failed chỉ chạy lại các job fail (không chạy lại job đã pass) để tiết kiệm phút CI.'},
+            {q:'trigger "schedule" trong workflow dùng để làm gì?',
+             opts:['Chạy theo lịch cron','Chạy khi có push','Chạy khi tạo PR','Bắt buộc merge'],
+             ans:0,
+             exp:'on: schedule với cron cho phép chạy workflow định kỳ, ví dụ quét bảo mật mỗi sáng thứ 2.'},
+        ]
+    },
+    {
+        name:'Quy trình & Best practice',icon:'🛡️',color:'#d29922',
+        questions:[
+            {q:'Quy tắc vàng khi làm việc với Git theo nhóm?',
+             opts:['Commit trực tiếp lên main','Không sửa trực tiếp trên main, dùng branch + PR','Không bao giờ commit','Push mọi thứ vào 1 nhánh'],
+             ans:1,
+             exp:'Size="lỗi" một nhánh riêng cho mỗi tính năng. Main luôn ổn định để deploy.'},
+            {q:'Nên commit message thế nào cho dễ hiểu?',
+             opts:['"update file"','"fix: xử lý null khi thanh toán"','"asd"','"xong việc"'],
+             ans:1,
+             exp:'Message tốt: bắt đầu bằng loại (feat:, fix:, docs:) + mô tả rõ. Giúp đồng nghiệp và chính bạn debug sau này.'},
+            {q:'Trước khi gửi link repo cho AI đọc, cần làm gì?',
+             opts:['Xóa secret/.env khỏi git, có README, chạy gh auth status','Gộp hết vào 1 commit','Xóa toàn bộ lịch sử','Tắt internet'],
+             ans:0,
+             exp:'Checklist chuẩn: README hướng dẫn chạy, không có secret/.env, gh auth status thấy "Logged in", biết đang ở nhánh nào.'},
+            {q:'Release là gì?',
+             opts:['Một nhánh đặc biệt','Phiên bản phát hành có số hiệu (v1.0.0) kèm file tải về','Một loại issue','Pull request cũ'],
+             ans:1,
+             exp:'Release đóng gói phiên bản hoàn chỉnh v1.0.0 cùng file (.zip, .exe). Người dùng tải ở đó, không cần xem code.'},
+            {q:'Lưu API key trong project bằng cách nào an toàn nhất?',
+             opts:['Ghi thẳng vào const trong code','Dùng gh secret set rồi đọc qua tên','Đưa vào README','Chat qua email'],
+             ans:1,
+             exp:'gh secret set API_KEY --body "..." lưu mã hóa. Robot Actions đọc qua tên ${{ secrets.API_KEY }}. Không bao giờ ghi trong code.'},
+            {q:'Khi gặp conflict khi merge, bạn nên làm gì?',
+             opts:['Xóa cả 2 nhánh','Sửa xung đột thủ công, chọn/mix thay đổi 2 phía, commit','Push thêm commit khác cũ','Tạo repo mới'],
+             ans:1,
+             exp:'Conflict = 2 người sửa cùng dòng. Bạn mở file, giữ phần đúng của cả 2, xóa <<<<<<< và ======= , rồi commit.'},
+            {q:'Gửi PR "Closes #12" mà PR chưa được merge thì issue #12?',
+             opts:['Tự động đóng ngay','Vẫn mở, chỉ đóng khi PR được merge','Bị xóa vĩnh viễn','Biến thành PR'],
+             ans:1,
+             exp:'Nhắc khéo: GitHub chỉ tự động đóng issue khi PR chứa "Closes #..." được merge thành công.'},
+            {q:'Thế nào là "squash merge"?',
+             opts:['Xóa PR','Gom nhiều commit của nhánh thành 1 commit sạch trên main','Tạo branch mới','Merge ngược'],
+             ans:1,
+             exp:'Squash giúp lịch sử main gọn. Khuyến nghị cho team nhỏ. Rebase thì lịch sử thẳng hàng nhưng nâng cao hơn.'},
+        ]
+    },
+];
+
+// ===========================
+// STATE
+// ===========================
+let currentDeckIdx=0;
+let currentQIdx=0;
+let currentDeck=null;
+let answers=[];
+let score=0;
+let selectedAns=null;
+let answered=false;
+let timerInterval=null;
+let startTime=0;
+let elapsedSec=0;
+
+// ===========================
+// RENDER DECKS
+// ===========================
+function renderDecks(){
+    const grid=document.getElementById('deckGrid');
+    const saved=JSON.parse(localStorage.getItem('quiz_best')||'{}');
+    grid.innerHTML=QUIZ_DECKS.map((d,i)=>{
+        const best=saved[i];
+        const bestHtml=best!==undefined
+            ?`<span class="dc-best good">🏆 ${best}%</span>`
+            :`<span class="dc-best none">Chưa làm</span>`;
+        return `<div class="deck-card" onclick="startQuiz(${i})">
+            <div class="free-badge">5 câu</div>
+            <div class="dc-ic">${d.icon}</div>
+            <div class="dc-title">${d.name}</div>
+            <div class="dc-count">${d.questions.length} câu hỏi</div>
+            ${bestHtml}
+        </div>`;
+    }).join('');
+}
+
+// ===========================
+// QUIZ FLOW
+// ===========================
+function startQuiz(deckIdx){
+    currentDeckIdx=deckIdx;
+    currentDeck=QUIZ_DECKS[deckIdx];
+    currentQIdx=0;
+    answers=new Array(currentDeck.questions.length).fill(null);
+    score=0;
+    selectedAns=null;
+    answered=false;
+
+    // Switch to quiz panel
+    document.getElementById('panel-decks').classList.remove('active');
+    document.getElementById('panel-quiz').classList.add('active');
+    document.getElementById('quizTopicTitle').textContent=currentDeck.icon+' '+currentDeck.name;
+
+    startTimer();
+    renderQuestion();
+}
+
+function renderQuestion(){
+    const q=currentDeck.questions[currentQIdx];
+    const total=currentDeck.questions.length;
+    document.getElementById('quizCount').textContent=(currentQIdx+1)+'/'+total;
+    document.getElementById('quizProgress').style.width=((currentQIdx)/total*100)+'%';
+
+    const card=document.getElementById('questionCard');
+    const letters=['A','B','C','D'];
+    card.innerHTML=`
+        <div class="q-num">Câu ${currentQIdx+1} / ${total}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="q-options">
+            ${q.opts.map((o,i)=>`
+                <div class="q-opt" onclick="selectOption(${i})">
+                    <div class="label">${letters[i]}</div>
+                    <div>${o}</div>
+                </div>`).join('')}
+        </div>
+        <div class="q-feedback" id="qFeedback"></div>`;
+
+    const btn=document.getElementById('btnNext');
+    btn.textContent=(currentQIdx===total-1)?'Xem kết quả 🏆':'Câu tiếp theo ➜';
+    btn.disabled=true;
+}
+
+function selectOption(idx){
+    if(answered)return;
+    answered=true;
+    selectedAns=idx;
+    const q=currentDeck.questions[currentQIdx];
+    const opts=document.querySelectorAll('.q-opt');
+    const isCorrect=idx===q.ans;
+
+    // Mark options
+    opts.forEach((el,i)=>{
+        el.classList.add('disabled');
+        if(i===q.ans)el.classList.add('correct');
+        if(i===idx&&!isCorrect)el.classList.add('wrong');
+    });
+
+    // Feedback
+    const fb=document.getElementById('qFeedback');
+    fb.className='q-feedback show '+(isCorrect?'correct':'wrong');
+    fb.innerHTML=(isCorrect?'✅ <strong>Chính xác!</strong>':'❌ <strong>Sai rồi.</strong>')
+        +`<div class="explain">💡 <strong>Giải thích:</strong> ${q.exp}</div>`;
+
+    answers[currentQIdx]=idx;
+    if(isCorrect)score++;
+    document.getElementById('btnNext').disabled=false;
+}
+
+function nextQ(){
+    currentQIdx++;
+    if(currentQIdx>=currentDeck.questions.length){
+        showResult();
+        return;
+    }
+    answered=false;
+    selectedAns=null;
+    renderQuestion();
+}
+
+// ===========================
+// TIMER
+// ===========================
+function startTimer(){
+    clearInterval(timerInterval);
+    elapsedSec=0;
+    startTime=Date.now();
+    const el=document.getElementById('quizTimer');
+    el.classList.remove('warn');
+    timerInterval=setInterval(()=>{
+        elapsedSec=Math.floor((Date.now()-startTime)/1000);
+        const m=String(Math.floor(elapsedSec/60)).padStart(2,'0');
+        const s=String(elapsedSec%60).padStart(2,'0');
+        el.textContent=elapsedSec>=120?`⏱ ${m}:${s}`:`${m}:${s}`;
+        if(elapsedSec>=120)el.classList.add('warn');
+        else el.classList.remove('warn');
+    },1000);
+}
+function stopTimer(){
+    clearInterval(timerInterval);
+    return elapsedSec;
+}
+
+// ===========================
+// RESULT
+// ===========================
+function showResult(){
+    stopTimer();
+    const total=currentDeck.questions.length;
+    const pct=Math.round(score/total*100);
+    const time=formatTime(elapsedSec);
+
+    // Save best score
+    const saved=JSON.parse(localStorage.getItem('quiz_best')||'{}');
+    if(saved[currentDeckIdx]===undefined||pct>saved[currentDeckIdx]){
+        saved[currentDeckIdx]=pct;
+        localStorage.setItem('quiz_best',JSON.stringify(saved));
+    }
+
+    let emoji,msg,sub;
+    if(pct>=90){emoji='🏆';msg='Xuất sắc!';sub='Bạn đã làm chủ chủ đề này. Hãy thử chủ đề tiếp theo!';}
+    else if(pct>=75){emoji='🌟';msg='Rất tốt!';sub='Gần chạm đỉnh cao. Ôn lại vài câu sai để hoàn hảo hơn.';}
+    else if(pct>=50){emoji='👍';msg='Khá tốt!';sub='Nắm được hơn nửa. Xem giải thích các câu sai để tiến bộ.';}
+    else{emoji='💪';msg='Cần ôn lại';sub='Đừng nản! Về xem Flashcards và Từ điển rồi thử lại nhé.';}
+
+    const result=document.getElementById('resultCard');
+    result.innerHTML=`
+        <div class="result-msg"><span>${emoji}</span>${msg}</div>
+        <div class="result-score-circle" style="--score:${pct}">
+            <div class="num">${score}/${total}</div>
+            <div class="lbl">${pct}%</div>
+        </div>
+        <div class="result-sub">${sub} • ⏱ ${time}</div>
+        <div class="result-buttons">
+            <button class="rb primary" onclick="startQuiz(${currentDeckIdx})">🔄 Làm lại</button>
+            <button class="rb ghost" onclick="backToDecks()">📚 Chọn chủ đề khác</button>
+            <button class="rb ghost" onclick="window.open('flashcards.html','_blank')">🃏 Ôn Flashcards</button>
+        </div>
+        <div class="review-section" id="reviewSection">
+            <h3>📋 Xem lại các câu ${score<total?'sai':'đã trả lời'}</h3>
+            <div id="reviewList"></div>
+        </div>`;
+
+    // Render review
+    const letters=['A','B','C','D'];
+    const reviewList=document.getElementById('reviewList');
+    reviewList.innerHTML=currentDeck.questions.map((q,i)=>{
+        const your=answers[i];
+        const correct=your===q.ans;
+        if(score===total&&correct)return '';
+        return `<div class="review-item">
+            <div class="rq">${i+1}. ${q.q}</div>
+            ${
+                correct
+                ?`<div class="ra your-correct"><span class="tag">Bạn chọn:</span> ${letters[your]} - ${q.opts[your]} ✔</div>`
+                :`<div class="ra your-wrong"><span class="tag">Bạn chọn:</span> ${letters[your]} - ${q.opts[your]} ✘</div>
+                  <div class="ra your-correct"><span class="tag">Đáp án:</span> ${letters[q.ans]} - ${q.opts[q.ans]} ✔</div>`
+            }
+            <div class="explain">💡 ${q.exp}</div>
+        </div>`;
+    }).join('')||'<div style="color:var(--green);text-align:center;padding:1rem">🎯 Hoàn hảo! Không có câu nào cần xem lại.</div>';
+
+    // Show result panel
+    document.getElementById('panel-quiz').classList.remove('active');
+    document.getElementById('panel-result').classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function formatTime(sec){
+    const m=Math.floor(sec/60);
+    const s=sec%60;
+    return m>0?`${m} phút ${s} giây`:`${s} giây`;
+}
+
+function backToDecks(){
+    stopTimer();
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-decks').classList.add('active');
+    renderDecks();
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded',()=>{
+    renderDecks();
+});
+</script>
+</body>
+</html>

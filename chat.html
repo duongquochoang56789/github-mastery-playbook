@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub AI Assistant - ChatGPT Full Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0f1419;--sidebar:#171c26;--border:#232b36;--border2:#2d3643;
+            --text:#e6edf3;--text2:#8b949e;--text3:#5c6770;--accent:#7aa2ff;
+            --accent2:#6e85d3;--green:#3fb950;--red:#f85149;--orange:#d29922;
+            --purple:#bc8cff;--pink:#f778ba;--cyan:#39d2c0;--bg2:#161b22;
+            --codebg:#0a0e14;
+        }
+        html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+        ::-webkit-scrollbar{width:8px;height:8px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+        ::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+        .app{display:flex;height:100vh}
+
+        /* ===== SIDEBAR ===== */
+        .sidebar{width:280px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:margin .3s ease}
+        .sidebar-top{padding:1rem;display:flex;gap:.5rem;border-bottom:1px solid var(--border)}
+        .btn-new{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem;border-radius:10px;background:rgba(122,162,255,.15);border:1px solid var(--accent);color:var(--accent);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .3s}
+        .btn-new:hover{background:var(--accent);color:#000}
+        .btn-home{width:40px;height:40px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s}
+        .btn-home:hover{color:var(--text);border-color:var(--accent)}
+        .conversations{flex:1;overflow-y:auto;padding:.5rem}
+        .conv-group-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:.6rem 1rem .3rem;font-weight:600}
+        .conv-item{display:flex;align-items:center;gap:.5rem;padding:.7rem .9rem;margin:2px 0;border-radius:10px;cursor:pointer;transition:background .2s;border:1px solid transparent;position:relative}
+        .conv-item:hover{background:var(--bg2)}
+        .conv-item.active{background:rgba(122,162,255,.1);border-color:var(--border)}
+        .conv-item-ic{font-size:.9rem}
+        .conv-info{flex:1;min-width:0}
+        .conv-title{font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .conv-meta{font-size:.68rem;color:var(--text3);margin-top:2px}
+        .conv-del{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--text3);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+        .conv-item:hover .conv-del{display:flex}
+        .conv-del:hover{color:var(--red);background:rgba(248,81,73,.1)}
+        .sidebar-bottom{padding:.8rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.6rem}
+        .model-info{flex:1;min-width:0}
+        .model-info .m-label{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .model-info .m-status{font-size:.68rem;color:var(--text3)}
+        .gear-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .3s;flex-shrink:0}
+        .gear-btn:hover{color:var(--text);border-color:var(--accent)}
+
+        /* ===== MAIN ===== */
+        .main{flex:1;display:flex;flex-direction:column;min-width:0}
+        .main-header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;flex-shrink:0}
+        .main-header-title{display:flex;align-items:center;gap:.6rem;font-weight:600;font-size:.95rem}
+        .main-header-title .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:.9rem}
+        .header-actions{display:flex;align-items:center;gap:.4rem}
+        .header-open{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.78rem;transition:all .3s}
+        .header-open:hover{border-color:var(--accent);color:var(--accent)}
+
+        /* Messages */
+        .messages{flex:1;overflow-y:auto;scroll-behavior:smooth}
+        .messages-inner{max-width:820px;margin:0 auto;padding:1.5rem 1.2rem;display:flex;flex-direction:column;gap:1.5rem}
+        .msg{display:flex;gap:1rem;animation:fadeUp .3s ease}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .msg-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-top:4px}
+        .msg.user .msg-avatar{background:var(--bg2);border:1px solid var(--border)}
+        .msg.bot .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--purple))}
+        .msg-body{flex:1;min-width:0}
+        .msg-role{font-size:.72rem;color:var(--text3);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+        .msg-content{font-size:.93rem;line-height:1.75;color:var(--text)}
+        .msg-content p{margin:.5rem 0}
+        .msg-content h1,.msg-content h2,.msg-content h3,.msg-content h4{margin:1rem 0 .5rem;font-weight:700;line-height:1.3}
+        .msg-content h1{font-size:1.5rem}
+        .msg-content h2{font-size:1.3rem}
+        .msg-content h3{font-size:1.1rem}
+        .msg-content ul,.msg-content ol{padding-left:1.4rem;margin:.5rem 0}
+        .msg-content ul li{margin:.25rem 0}
+        .msg-content ol li{margin:.25rem 0}
+        .msg-content code{background:var(--codebg);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em;color:var(--green)}
+        .msg-content pre{background:var(--codebg);border:1px solid var(--border);border-radius:10px;padding:1rem;overflow-x:auto;margin:.75rem 0;position:relative}
+        .msg-content pre code{background:none;border:none;padding:0;font-size:.82rem;color:#d6e2ff;line-height:1.6;display:block}
+        .msg-content pre .code-lang{position:sticky;display:inline-block;font-size:.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem}
+        .msg-content pre .code-copy{position:absolute;top:.5rem;right:.5rem;background:var(--border);border:none;color:var(--text2);padding:3px 8px;border-radius:5px;cursor:pointer;font-size:.7rem;transition:all .3s}
+        .msg-content pre .code-copy:hover{background:var(--accent);color:#000}
+        .msg-content blockquote{border-left:3px solid var(--accent);padding-left:1rem;color:var(--text2);margin:.75rem 0;font-style:italic}
+        .msg-content table{border-collapse:collapse;width:100%;margin:.75rem 0;font-size:.85rem}
+        .msg-content th,.msg-content td{border:1px solid var(--border);padding:.5rem .75rem;text-align:left}
+        .msg-content th{background:var(--bg2);font-weight:600}
+        .msg-content tr:nth-child(even) td{background:rgba(22,27,34,.5)}
+        .msg-content strong,.msg-content b{color:#fff;font-weight:600}
+        .msg-content a{color:var(--accent)}
+        .msg-content hr{border:none;border-top:1px solid var(--border);margin:1rem 0}
+        .msg-content img{max-width:100%;border-radius:8px}
+
+        /* Empty state */
+        .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+        .empty-state .big-logo{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:1.5rem;box-shadow:0 8px 40px rgba(122,162,255,.25)}
+        .empty-state h1{font-size:1.8rem;font-weight:700;margin-bottom:.8rem}
+        .empty-state p{color:var(--text2);max-width:400px;margin-bottom:2rem;font-size:.95rem}
+        .suggestion-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;max-width:620px;width:100%}
+        .suggestion{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:left;cursor:pointer;transition:all .3s;display:flex;gap:.7rem;align-items:flex-start}
+        .suggestion:hover{border-color:var(--accent);transform:translateY(-2px);background:rgba(122,162,255,.05)}
+        .suggestion .sug-ic{font-size:1.2rem}
+        .suggestion .sug-text{font-size:.8rem;color:var(--text2);line-height:1.5}
+
+        /* Composer */
+        .composer-wrap{padding:0 1.2rem 1.2rem;flex-shrink:0}
+        .composer{max-width:820px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:18px;transition:box-shadow .3s,border-color .3s}
+        .composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(122,162,255,.15)}
+        .composer textarea{border:none;background:none;width:100%;padding:1rem 1.2rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.95rem;line-height:1.6;resize:none;outline:none;max-height:200px;min-height:50px}
+        .composer textarea::placeholder{color:var(--text3)}
+        .composer-bottom{display:flex;align-items:center;justify-content:space-between;padding:.4rem .8rem .6rem}
+        .composer-meta{display:flex;align-items:center;gap:.6rem}
+        .composer-meta span{font-size:.7rem;color:var(--text3)}
+        .btn-send{width:40px;height:40px;border-radius:12px;background:var(--accent);border:none;color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s}
+        .btn-send:hover:not(:disabled){filter:brightness(1.1);transform:scale(1.05)}
+        .btn-send:disabled{opacity:.4;cursor:not-allowed}
+        .composer-hint{text-align:center;font-size:.68rem;color:var(--text3);margin-top:.6rem}
+
+        /* Typing */
+        .typing{display:inline-flex;gap:4px;padding:.3rem 0}
+        .typing span{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:typingBlink 1.4s infinite}
+        .typing span:nth-child(2){animation-delay:.2s}
+        .typing span:nth-child(3){animation-delay:.4s}
+        @keyframes typingBlink{0%,60%,100%{opacity:.2;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+        /* Streaming */
+        .stream-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);margin-right:.5rem;animation:streamPulse 1s ease-in-out infinite;box-shadow:0 0 8px rgba(63,185,80,.6)}
+        @keyframes streamPulse{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+        .stream-meta{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text3);margin-top:.35rem}}
+
+        /* Settings Modal */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center}
+        .modal-overlay.open{display:flex}
+        .modal{width:480px;max-width:calc(100vw - 2rem);background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.5rem;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto}
+        .modal h3{font-size:1.2rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+        .modal label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:1rem 0 .3rem;font-weight:600}
+        .modal label:first-of-type{margin-top:0}
+        .modal input,.modal select,.modal textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;color:var(--text);font-size:.9rem;outline:none;transition:border .3s;font-family:'Inter',sans-serif}
+        .modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--accent)}
+        .modal textarea{resize:vertical;min-height:80px}
+        .modal .modal-note{font-size:.72rem;color:var(--text3);margin-top:.4rem;line-height:1.5}
+        .modal-btn-row{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.2rem}
+        .modal-btn{padding:.6rem 1.2rem;border-radius:10px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .3s}
+        .modal-btn.primary{background:var(--accent);color:#000}
+        .modal-btn.primary:hover{filter:brightness(1.1)}
+        .modal-btn.ghost{background:var(--bg);border:1px solid var(--border);color:var(--text2)}
+        .modal-btn.ghost:hover{color:var(--text)}
+        .modal-btn.danger{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+        .modal-btn.danger:hover{background:var(--red);color:#000}
+
+        /* Responsive */
+        @media(max-width:768px){
+            .sidebar{margin-left:-280px;position:absolute;z-index:500;height:100%}
+            .sidebar.open{margin-left:0}
+            .sidebar-toggle-btn{display:flex!important}
+        }
+        .sidebar-toggle-btn{display:none}
+        .overlay-mobile{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none}
+        .overlay-mobile.show{display:block}
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <button class="btn-new" onclick="newConversation()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Tạo hội thoại mới
+            </button>
+            <button class="btn-home" onclick="window.location.href='index.html'" title="Quay về app chính">⌂</button>
+        </div>
+        <div class="conversations" id="convList"></div>
+        <div class="sidebar-bottom">
+            <div class="model-info">
+                <div class="m-label" id="sidebarModel">Gemini 3.8 Flash</div>
+                <div class="m-status" id="sidebarStatus">Đang kết nối...</div>
+            </div>
+            <button class="gear-btn" title="Lộ trình cho người mới" onclick="window.open('guide.html','_blank')">🧭</button>
+            <button class="gear-btn" title="Trung tâm Hub" onclick="window.open('hub.html','_blank')">🏠</button>
+            <button class="gear-btn" title="Học với Flashcards" onclick="window.open('flashcards.html','_blank')">🃏</button>
+            <button class="gear-btn" title="Làm quiz" onclick="window.open('quiz.html','_blank')">📝</button>
+            <button class="gear-btn" onclick="openSettings()">⚙️</button>
+        </div>
+    </aside>
+    <div class="overlay-mobile" id="mobileOverlay" onclick="toggleSidebarMobile(false)"></div>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+        <header class="main-header">
+            <div class="main-header-title">
+                <button class="gear-btn sidebar-toggle-btn" onclick="toggleSidebarMobile()">☰</button>
+                <span class="logo">🐙</span>
+                <span id="curConvTitle">Hội thoại mới</span>
+            </div>
+            <div class="header-actions">
+                <button class="header-open" onclick="openSettings()">⚙️ Cài đặt</button>
+            </div>
+        </header>
+
+        <div class="messages" id="messages">
+            <div class="empty-state" id="emptyState">
+                <div class="big-logo">🐙</div>
+                <h1>GitHub AI Assistant</h1>
+                <p>Trợ lý AI chuyên về Git, GitHub, CI/CD và phát triển phần mềm</p>
+                <div class="suggestion-grid">
+                    <div class="suggestion" onclick="useSuggestion('Code cua toi bi conflict khi merge, gio xu ly the nao?')">
+                        <span class="sug-ic">🔀</span>
+                        <span class="sug-text">Code bị conflict khi merge, xử lý thế nào?</span>
+                    </div>
+                    <div class="suggestion" onclick="useSuggestion('Cho toi xin file .gitignore chuan cho du an Node.js/React')">
+                        <span class="sug-ic">📄</span>
+                        <span class="sug-text">File .gitignore chuẩn cho Node.js/React</span>
+                    </div>
+                    <div class="suggestion" onclick="useSuggestion('Tạo giúp tôi 1 workflow GitHub Actions để tự động deploy code')">
+                        <span class="sug-ic">🤖</span>
+                        <span class="sug-text">Workflow GitHub Actions tự deploy</span>
+                    </div>
+                    <div class="suggestion" onclick="useSuggestion('Toi lo commit nham file chua mat khau, lam sao xoa bo hoan toan?')">
+                        <span class="sug-ic">🔒</span>
+                        <span class="sug-text">Lỡ commit nhầm file chứa mật khẩu</span>
+                    </div>
+                </div>
+            </div>
+            <div class="messages-inner" id="messagesInner" style="display:none"></div>
+        </div>
+
+        <!-- Composer -->
+        <div class="composer-wrap">
+            <div class="composer">
+                <textarea id="chatInput" placeholder="Nhập câu hỏi về Git, GitHub, CI/CD... (Enter để gửi, Shift+Enter để xuống dòng)" rows="1"></textarea>
+                <div class="composer-bottom">
+                    <div class="composer-meta">
+                        <span id="composerModel">Gemini 3.8 Flash</span>
+                    </div>
+                    <button class="btn-send" id="btnStop" onclick="stopGenerating()" title="Dừng" style="display:none;background:rgba(248,81,73,.15);color:var(--red)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                    </button>
+                    <button class="btn-send" id="btnSend" onclick="sendMessage()" title="Gửi">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="composer-hint">GitHub Mastery Playbook • OpenRouter AI • Lưu hội thoại tự động</div>
+        </div>
+    </main>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+    <div class="modal">
+        <h3>⚙️ Cài đặt</h3>
+        <label>OpenRouter API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-or-v1-...">
+        <div class="modal-note">Lấy key miễn phí tại <strong>openrouter.ai/keys</strong></div>
+
+        <label>AI Model</label>
+        <select id="modelSelect">
+            <option value="google/gemini-3.8-flash">Gemini 3.8 Flash (Mới nhất)</option>
+            <option value="google/gemini-3-flash-preview">Gemini 3 Flash</option>
+            <option value="openrouter/auto">Auto (Tự chọn tốt nhất)</option>
+            <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+            <option value="deepseek/deepseek-chat-v3-0324">DeepSeek V3</option>
+            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        </select>
+
+        <label>Ngôn ngữ trả lời</label>
+        <select id="langSelect">
+            <option value="Tiếng Việt (đơn giản, dễ hiểu)">Tiếng Việt đơn giản</option>
+            <option value="English">English</option>
+        </select>
+
+        <label>Hướng dẫn hệ thống (System Prompt)</label>
+        <textarea id="sysPromptInput" rows="4"></textarea>
+        <div class="modal-note">Bạn có thể tùy chỉnh cách AI trả lời</div>
+
+        <div class="modal-btn-row">
+            <button class="modal-btn danger" onclick="resetAll()">Đặt lại</button>
+            <button class="modal-btn ghost" onclick="closeSettings()">Hủy</button>
+            <button class="modal-btn primary" onclick="saveSettings()">Lưu cài đặt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===========================
+// CONFIG
+// ===========================
+const DEFAULT_API_KEY='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';
+const DEFAULT_MODEL='google/gemini-3.8-flash';
+const FALLBACK_MODELS=['google/gemini-3.8-flash','google/gemini-3-flash-preview','meta-llama/llama-3.3-70b-instruct','deepseek/deepseek-chat-v3-0324'];
+
+const DEFAULT_SYSPROMPT=`Bạn là **GitHub AI Assistant** - trợ lý AI chuyên về Git, GitHub, CI/CD và phát triển phần mềm.
+
+## Kiến thức chính:
+- **Git**: clone, branch, commit, push, pull, status, log, diff, merge, rebase, stash, tag, revert, reset
+- **GitHub CLI (gh)**: repo, issue, pr, run, release, secret, variable, workflow
+- **GitHub Actions**: CI/CD, workflow YAML, triggers, secrets, variables
+- **GitHub API**: REST, GraphQL, Octokit, rate limiting
+- **Quy trình**: feature branch, PR review, merge strategies (merge/squash/rebase)
+- **Best practices**: .gitignore, README, branch protection, commit convention
+
+## Nguyên tắc trả lời:
+1. Trả lời bằng ${'LANG_PLACEHOLDER'}
+2. Dùng đúng markdown: code block có đánh dấu ngôn ngữ, bảng, danh sách
+3. Luôn đưa code mẫu hoàn chỉnh để copy được
+4. Giải thích đơn giản, dùng ví dụ thực tế
+5. Nếu là lỗi, yêu cầu error message đầy đủ
+6. Không bao giờ tiết lộ API key hay secret`;
+
+// ===========================
+// STATE
+// ===========================
+let conversations=[];
+let currentConvId=null;
+let apiKey=localStorage.getItem('gh_apikey')||DEFAULT_API_KEY;
+let model=localStorage.getItem('gh_model')||DEFAULT_MODEL;
+let lang=localStorage.getItem('gh_lang')||'Tiếng Việt (đơn giản, dễ hiểu)';
+let isGenerating=false;
+let sysPromptDefault=DEFAULT_SYSPROMPT.replace('LANG_PLACEHOLDER', lang);
+
+// ===========================
+// PERSISTENCE
+// ===========================
+function saveConvs(){ localStorage.setItem('gh_convs',JSON.stringify(conversations)); }
+function saveMeta(){ localStorage.setItem('gh_apikey',apiKey); localStorage.setItem('gh_model',model); localStorage.setItem('gh_lang',lang); }
+function loadConvs(){
+    const saved=localStorage.getItem('gh_convs');
+    return saved?JSON.parse(saved):[];
+}
+
+// ===========================
+// CONVERSATION MANAGEMENT
+// ===========================
+function newConversation(){
+    const id='c'+Date.now();
+    const conv={id,title:'Hội thoại mới',messages:[],created:Date.now()};
+    conversations.unshift(conv);
+    currentConvId=id;
+    saveConvs();
+    renderConvList();
+    renderConv(conv);
+    closeMobileSidebar();
+    document.getElementById('chatInput').focus();
+}
+
+function deleteConversation(id,e){
+    e.stopPropagation();
+    if(!confirm('Xóa hội thoại này?'))return;
+    conversations=conversations.filter(c=>c.id!==id);
+    if(currentConvId===id){
+        currentConvId=conversations.length?conversations[0].id:null;
+        renderConv(currentConvId?conversations.find(c=>c.id===currentConvId):null);
+    }
+    saveConvs();
+    renderConvList();
+    if(!currentConvId) showEmpty();
+}
+
+function selectConversation(id){
+    const conv=conversations.find(c=>c.id===id);
+    if(!conv)return;
+    currentConvId=id;
+    renderConvList();
+    renderConv(conv);
+    closeMobileSidebar();
+}
+
+function renderConvList(){
+    const list=document.getElementById('convList');
+    const groups={Today:[],Yesterday:[],Earlier:[]};
+    const now=new Date();
+    conversations.forEach(c=>{
+        const d=new Date(c.created);
+        const isToday=d.toDateString()===now.toDateString();
+        const isYday=d.toDateString()===new Date(now.getTime()-86400000).toDateString();
+        const title=c.title||'Hội thoại không tên';
+        const icon=(c.messages[1]?.content||c.messages[0]?.content||'💬').slice(0,2);
+        const meta=new Date(c.created).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+        const item=`<div class="conv-item ${c.id===currentConvId?'active':''}" onclick="selectConversation('${c.id}')">
+            <span class="conv-item-ic">${icon}</span>
+            <div class="conv-info"><div class="conv-title">${escapeHtml(title)}</div><div class="conv-meta">${c.messages.length} tin nhắn • ${meta}</div></div>
+            <button class="conv-del" onclick="deleteConversation('${c.id}',event)" title="Xóa">✕</button>
+        </div>`;
+        if(isToday)groups.Today.push(item);
+        else if(isYday)groups.Yesterday.push(item);
+        else groups.Earlier.push(item);
+    });
+    let html='';
+    if(groups.Today.length)html+=`<div class="conv-group-label">Hôm nay</div>`+groups.Today.join('');
+    if(groups.Yesterday.length)html+=`<div class="conv-group-label">Hôm qua</div>`+groups.Yesterday.join('');
+    if(groups.Earlier.length)html+=`<div class="conv-group-label">Trước đó</div>`+groups.Earlier.join('');
+    if(!html)html='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:.8rem">Chưa có hội thoại nào</div>';
+    list.innerHTML=html;
+}
+
+// ===========================
+// RENDER CONVERSATION
+// ===========================
+function renderConv(conv){
+    const messages=document.getElementById('messages');
+    const inner=document.getElementById('messagesInner');
+    const empty=document.getElementById('emptyState');
+
+    if(!conv){
+        showEmpty();
+        return;
+    }
+    empty.style.display='none';
+    inner.style.display='flex';
+    document.getElementById('curConvTitle').textContent=conv.title||'Hội thoại mới';
+
+    inner.innerHTML='';
+    conv.messages.forEach(m=>{
+        const div=document.createElement('div');
+        div.className='msg '+m.role;
+        const avatar=m.role==='user'?'👤':'🐙';
+        const roleName=m.role==='user'?'Bạn':'GitHub Assistant';
+        div.innerHTML=`<div class="msg-avatar">${avatar}</div>
+            <div class="msg-body"><div class="msg-role">${roleName}</div><div class="msg-content">${renderMarkdown(m.content)}</div></div>`;
+        inner.appendChild(div);
+    });
+    scrollToBottom();
+}
+
+function showEmpty(){
+    document.getElementById('emptyState').style.display='flex';
+    document.getElementById('messagesInner').style.display='none';
+}
+
+// ===========================
+// WYSIWYG MARKDOWN RENDERER
+// ===========================
+function escapeHtml(text){
+    const div=document.createElement('div');
+    div.textContent=text;
+    return div.innerHTML;
+}
+
+function renderMarkdown(md){
+    if(!md)return '';
+    // Add code copy handlers after render via delegate
+    let html=escapeHtml(md);
+
+    // Headers
+    html=html.replace(/(^|\n)##### (.*?)(\n|$)/g,'\n<h5>$2</h5>\n');
+    html=html.replace(/(^|\n)#### (.*?)(\n|$)/g,'\n<h4>$2</h4>\n');
+    html=html.replace(/(^|\n)### (.*?)(\n|$)/g,'\n<h3>$2</h3>\n');
+    html=html.replace(/(^|\n)## (.*?)(\n|$)/g,'\n<h2>$2</h2>\n');
+    html=html.replace(/(^|\n)# (.*?)(\n|$)/g,'\n<h1>$2</h1>\n');
+
+    // Horizontal rule
+    html=html.replace(/(^|\n)---(\n|$)/g,'\n<hr>\n');
+
+    // Fenced code blocks (lock first, process content inside)
+    let codeBlocks=[];
+    html=html.replace(/(```|~~~)(\w*)[\s\n]*([\s\S]*?)\1/g,(match,_,lang,code)=>{
+        const idx=codeBlocks.length;
+        codeBlocks.push({lang:lang||'text',code:code.trim()});
+        return '\u0000CB'+idx+'\u0000';
+    });
+
+    // Blockquote
+    html=html.split('\n').map(line=>{
+        let m=line.match(/^&gt;\s?(.*)/)||line.match(/^&gt;&gt;&gt;\s?(.*)/);
+        if(m)return '<blockquote>'+m[1]+'</blockquote>';
+        return line;
+    }).join('\n');
+
+    // Bold + Italic
+    html=html.replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>');
+    html=html.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    html=html.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+    html=html.replace(/__([^_]+)__/g,'<strong>$1</strong>');
+
+    // Strikethrough
+    html=html.replace(/~~([^~]+)~~/g,'<del>$1</del>');
+
+    // Inline code (after block handling)
+    html=html.replace(/`([^`]+)`/g,'<code>$1</code>');
+
+    // Links
+    html=html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+
+    // Blockquote ensure multiline->single (simplified)
+    html=html.split('\n').map(line=>{
+        return line.replace(/&gt;\s?/g,'');
+    }).join('\n');
+
+    // Tables
+    html=processTables(html);
+
+    // Lists
+    html=processLists(html);
+
+    // Paragraphs & line breaks
+    html=processParagraphs(html);
+
+    // Restore code blocks
+    html=html.replace(/\u0000CB(\d+)\u0000/g,(_,i)=>{
+        const b=codeBlocks[+i];
+        return `<pre><span class="code-lang">${b.lang}</span><button class="code-copy" onclick="copyCode(this)" data-code="${btoa(unescape(encodeURIComponent(b.code)))}">Copy</button><code>${escapeHtml(b.code)}</code></pre>`;
+    });
+
+    return html;
+}
+
+function processTables(html){
+    const lines=html.split('\n');
+    let inTable=false;
+    let tableHtml='';
+    let result=[];
+    for(let i=0;i<lines.length;i++){
+        const line=lines[i];
+        if(line.trim().startsWith('|') && line.split('|').length>3){
+            const cells=line.split('|').filter(c=>c.trim()!=='').map(c=>c.trim());
+            if(line.includes('---')||line.match(/\|[\s:-]+\|/)){
+                // separator row - skip
+                continue;
+            }
+            if(!inTable){
+                inTable=true;
+                tableHtml='<table><thead><tr>'+cells.map(c=>`<th>${inlineActions(c)}</th>`).join('')+'</tr></thead><tbody>';
+            }else{
+                tableHtml+='<tr>'+cells.map(c=>`<td>${inlineActions(c)}</td>`).join('')+'</tr>';
+            }
+        }else{
+            if(inTable){
+                tableHtml+='</tbody></table>';
+                result.push(tableHtml);
+                tableHtml='';
+                inTable=false;
+            }
+            result.push(line);
+        }
+    }
+    if(inTable){tableHtml+='</tbody></table>';result.push(tableHtml);}
+    return result.join('\n');
+}
+
+function inlineActions(text){
+    return text
+        .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+        .replace(/`([^`]+)`/g,'<code>$1</code>');
+}
+
+function processLists(html){
+    const lines=html.split('\n');
+    let out=[];
+    let ulOpen=false,olOpen=false;
+    const parts=[];
+    for(let i=0;i<lines.length;i++){
+        let line=lines[i];
+        let ulMatch=line.match(/^[-*+]\s+(.+)/);
+        let olMatch=line.match(/^\d+\.\s+(.+)/);
+        if(ulMatch){
+            if(olOpen){parts.push('</ol>');olOpen=false;}
+            if(!ulOpen){parts.push('<ul>');ulOpen=true;}
+            parts.push('<li>'+ulMatch[1]+'</li>');
+        }else if(olMatch){
+            if(ulOpen){parts.push('</ul>');ulOpen=false;}
+            if(!olOpen){parts.push('<ol>');olOpen=true;}
+            parts.push('<li>'+olMatch[1]+'</li>');
+        }else{
+            if(ulOpen){parts.push('</ul>');ulOpen=false;}
+            if(olOpen){parts.push('</ol>');olOpen=false;}
+            parts.push(line);
+        }
+    }
+    if(ulOpen)parts.push('</ul>');
+    if(olOpen)parts.push('</ol>');
+    return parts.join('\n');
+}
+
+function processParagraphs(html){
+    const lines=html.split('\n');
+    const out=[];
+    let paragraph=[];
+    const blockStart=/^\s*(<h[1-5]|<ul|<ol|<blockquote|<hr|<table|<pre)/;
+    for(let i=0;i<lines.length;i++){
+        const line=lines[i].trim();
+        if(line===''){
+            if(paragraph.length){out.push('<p>'+paragraph.join(' ')+'</p>');paragraph=[];}
+            continue;
+        }
+        if(blockStart.test(line)){
+            if(paragraph.length){out.push('<p>'+paragraph.join(' ')+'</p>');paragraph=[];}
+            out.push(line);
+            continue;
+        }
+        paragraph.push(line);
+    }
+    if(paragraph.length)out.push('<p>'+paragraph.join(' ')+'</p>');
+    return out.join('\n');
+}
+
+function copyCode(btn){
+    const code=btn.dataset.code;
+    const decoded=decodeURIComponent(escape(atob(code)));
+    navigator.clipboard.writeText(decoded).then(()=>{
+        btn.textContent='✓ Copied';
+        setTimeout(()=>btn.textContent='Copy',1200);
+    }).catch(()=>{
+        // Fallback
+        const ta=document.createElement('textarea');
+        ta.value=decoded;document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta);
+        btn.textContent='✓ Copied';
+        setTimeout(()=>btn.textContent='Copy',1200);
+    });
+}
+
+// ===========================
+// COMPOSER
+// ===========================
+const textarea=document.getElementById('chatInput');
+textarea.addEventListener('input',()=>{
+    textarea.style.height='auto';
+    textarea.style.height=Math.min(textarea.scrollHeight,200)+'px';
+});
+textarea.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'&&!e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+function useSuggestion(text){
+    textarea.value=text;
+    textarea.focus();
+    sendMessage();
+}
+
+function scrollToBottom(){
+    const m=document.getElementById('messages');
+    m.scrollTop=m.scrollHeight;
+}
+
+// ===========================
+// SEND MESSAGE (with streaming)
+// ===========================
+let streamAbort=null;
+let streamCanceled=false;
+
+function stopGenerating(){
+    streamCanceled=true;
+    if(streamAbort)streamAbort.abort();
+}
+
+async function sendMessage(){
+    if(isGenerating)return;
+    const text=textarea.value.trim();
+    if(!text)return;
+
+    // Ensure a conversation exists
+    if(!currentConvId) newConversation();
+    const conv=conversations.find(c=>c.id===currentConvId);
+    if(!conv)return;
+
+    // Update title on first message
+    if(conv.messages.length===0){
+        conv.title=text.slice(0,50)+ (text.length>50?'...':'');
+    }
+
+    // Add user msg
+    conv.messages.push({role:'user',content:text});
+    if(conv.messages.filter(m=>m.role==='user').length===1){
+        conv.createdAt=Date.now();
+    }
+    textarea.value='';
+    textarea.style.height='auto';
+    renderConv(conv);
+    saveConvs();
+    renderConvList();
+
+    isGenerating=true;
+    streamCanceled=false;
+    document.getElementById('btnSend').disabled=true;
+    document.getElementById('btnStop').style.display='flex';
+
+    // Create streaming message slot
+    const liveDiv=createStreamMsg();
+    scrollToBottom();
+
+    const sysPrompt=sysPromptDefault.replace('LANG_PLACEHOLDER', lang);
+
+    const history=conv.messages.map(m=>({role:m.role,content:m.content})).slice(-20);
+
+    let reply='';
+    let success=false;
+    let lastError='';
+
+    const modelsToTry=[model,...FALLBACK_MODELS].filter((m,i,a)=>a.indexOf(m)===i);
+
+    for(const mdl of modelsToTry){
+        if(success||streamCanceled)break;
+        streamAbort=new AbortController();
+        try{
+            const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                    'Authorization':'Bearer '+apiKey,
+                    'HTTP-Referer':window.location.href,
+                    'X-Title':'GitHub Mastery Playbook'
+                },
+                body:JSON.stringify({
+                    model:mdl,
+                    messages:[{role:'system',content:sysPrompt},...history],
+                    max_tokens:4096,
+                    temperature:0.7,
+                    stream:true
+                }),
+                signal:streamAbort.signal
+            });
+            if(!res.ok){
+                const err=await res.json();
+                lastError=mdl+': '+(err.error?.message||res.status);
+                continue;
+            }
+
+            const reader=res.body.getReader();
+            const decoder=new TextDecoder();
+            let buf='';
+            let lastRender=0;
+
+            while(true){
+                const {done,value}=await reader.read();
+                if(done||streamCanceled)break;
+                buf+=decoder.decode(value,{stream:true});
+                const lines=buf.split('\n');
+                buf=lines.pop();
+                for(const line of lines){
+                    const t=line.trim();
+                    if(!t.startsWith('data:'))continue;
+                    const data=t.slice(5).trim();
+                    if(data==='[DONE]')continue;
+                    try{
+                        const j=JSON.parse(data);
+                        const delta=j.choices?.[0]?.delta?.content;
+                        if(delta){reply+=delta;updateStreamRaw(liveDiv,reply,mdl);}
+                    }catch(e){}
+                }
+                // Debounced markdown re-render for smoothness
+                const now=Date.now();
+                if(now-lastRender>50){
+                    lastRender=now;
+                    updateStreamMsg(liveDiv,reply,mdl);
+                }
+            }
+            if(reply && !streamCanceled){ success=true; }
+            if(mdl!==model&&mdl!==modelsToTry[0]&&reply){
+                reply+='\n\n_(model dự phòng: '+mdl+')_';
+            }
+        }catch(err){
+            if(err.name==='AbortError'){
+                streamCanceled=true;
+                break;
+            }
+            lastError=err.message;
+        }
+    }
+
+    if(streamCanceled){
+        if(reply)reply+='\n\n_(⏹️ Đã dừng bởi người dùng)_';
+        else reply='_(⏹️ Đã dừng bởi người dùng)_';
+        success=true;
+    }
+
+    if(!success){
+        reply='❌ **Không kết nối được AI.**\n\n'+lastError+'\n\nKiểm tra:\n- API key trong ⚙️ Cài đặt\n- Số dư tài khoản\n- Model đang chọn\n\nHoặc dùng lại model mặc định.';
+    }
+
+    finalizeStreamMsg(liveDiv,reply);
+    conv.messages.push({role:'assistant',content:reply});
+    renderConv(conv);
+    saveConvs();
+    renderConvList();
+
+    // Save settings references - ensure current model persisted
+    saveMeta();
+
+    isGenerating=false;
+    document.getElementById('btnSend').disabled=false;
+    document.getElementById('btnStop').style.display='none';
+    textarea.focus();
+}
+
+function createStreamMsg(){
+    const inner=document.getElementById('messagesInner');
+    if(inner.style.display==='none'){inner.style.display='flex';document.getElementById('emptyState').style.display='none';}
+    const div=document.createElement('div');
+    div.className='msg bot';
+    div.id='liveMsg';
+    div.innerHTML=`<div class="msg-avatar">🐙</div><div class="msg-body">
+        <div class="msg-role">GitHub Assistant</div>
+        <div class="msg-content"><div class="stream-dot"></div><span style="color:var(--text2)">đang suy nghĩ...</span></div>
+        <div class="stream-meta"></div>
+    </div>`;
+    inner.appendChild(div);
+    return div;
+}
+
+function updateStreamRaw(div,text,mdl){
+    const c=div.querySelector('.msg-content');
+    if(!c||!text)return;
+    if(c.querySelector('.stream-dot')){
+        c.innerHTML='';
+        const pre=document.createElement('pre');
+        pre.style.margin='0';pre.style.whiteSpace='pre-wrap';pre.style.fontFamily='inherit';pre.style.fontSize='.95rem';
+        c.appendChild(pre);
+        pre.textContent=text;
+    }else{
+        const pre=c.querySelector('pre');
+        if(pre)pre.textContent=text;
+    }
+    // show model on first chunk
+    const meta=div.querySelector('.stream-meta');
+    if(meta&&mdl&&!meta.textContent&&mdl!==model){
+        meta.textContent='model dự phòng: '+mdl;
+        meta.style.cssText='font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-top:.4rem';
+    }
+}
+
+function updateStreamMsg(div,text,mdl){
+    if(!text)return;
+    const c=div.querySelector('.msg-content');
+    // render markdown (debounced), guard invalid md
+    try{
+        const html=renderMarkdown(text);
+        c.innerHTML=html;
+    }catch(e){}
+    scrollToBottom();
+    // wire copy buttons
+    c.querySelectorAll('.code-copy').forEach((btn,i)=>{
+        if(!btn.dataset.wired){
+            btn.dataset.wired='1';
+            btn.onclick=()=>copyCode(btn);
+        }
+    });
+}
+
+function finalizeStreamMsg(div,text){
+    if(div&&div.parentNode){
+        const c=div.querySelector('.msg-content');
+        if(c){
+            try{c.innerHTML=renderMarkdown(text||'');}catch(e){c.textContent=text||'';}
+            c.querySelectorAll('.code-copy').forEach(btn=>{
+                if(!btn.dataset.wired){
+                    btn.dataset.wired='1';
+                    btn.onclick=()=>copyCode(btn);
+                }
+            });
+        }
+        // remove model meta note idempotent
+    }
+    scrollToBottom();
+}
+
+function appendTyping(){
+    const inner=document.getElementById('messagesInner');
+    const div=document.createElement('div');
+    div.className='msg bot';
+    div.id='typingMsg';
+    div.innerHTML=`<div class="msg-avatar">🐙</div><div class="msg-body"><div class="msg-role">GitHub Assistant</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+    inner.appendChild(div);
+    scrollToBottom();
+}
+function removeTyping(){
+    const el=document.getElementById('typingMsg');
+    if(el)el.remove();
+}
+
+// ===========================
+// SETTINGS
+// ===========================
+function openSettings(){
+    document.getElementById('apiKeyInput').value=apiKey;
+    document.getElementById('modelSelect').value=model;
+    document.getElementById('langSelect').value=lang;
+    document.getElementById('sysPromptInput').value=sysPromptDefault;
+    document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){
+    document.getElementById('settingsOverlay').classList.remove('open');
+}
+function saveSettings(){
+    apiKey=document.getElementById('apiKeyInput').value.trim()||DEFAULT_API_KEY;
+    model=document.getElementById('modelSelect').value;
+    lang=document.getElementById('langSelect').value;
+    sysPromptDefault=document.getElementById('sysPromptInput').value||DEFAULT_SYSPROMPT;
+    saveMeta();
+    updateSidebarInfo();
+    closeSettings();
+    appendSystemNote('✅ Cài đặt đã lưu');
+}
+function resetAll(){
+    if(!confirm('Đặt lại toàn bộ cài đặt và xóa mọi hội thoại?'))return;
+    localStorage.removeItem('gh_convs');
+    localStorage.removeItem('gh_apikey');
+    localStorage.removeItem('gh_model');
+    localStorage.removeItem('gh_lang');
+    apiKey=DEFAULT_API_KEY;
+    model=DEFAULT_MODEL;
+    lang='Tiếng Việt (đơn giản, dễ hiểu)';
+    conversations=[];
+    currentConvId=null;
+    renderConvList();
+    showEmpty();
+    updateSidebarInfo();
+    closeSettings();
+    appendSystemNote('🔄 Đã đặt lại toàn bộ');
+}
+function appendSystemNote(text){
+    const inner=document.getElementById('messagesInner');
+    if(inner.style.display==='none'){inner.style.display='flex';document.getElementById('emptyState').style.display='none';}
+    const div=document.createElement('div');
+    div.className='msg bot';
+    div.innerHTML=`<div class="msg-avatar">🐙</div><div class="msg-body"><div class="msg-content"><p style="color:var(--cyan);font-size:.85rem">${text}</p></div></div>`;
+    inner.appendChild(div);
+    scrollToBottom();
+}
+
+function updateSidebarInfo(){
+    const modelName=model.split('/').pop().replace(/-/g,' ').replace('flash','Flash').replace('preview','Preview');
+    document.getElementById('sidebarModel').textContent=model.split('/')[1].split('-')[0]+' '+(model.split('/')[1].split('-')[1]||'').toUpperCase()||model;
+    document.getElementById('composerModel').textContent=model;
+}
+
+// ===========================
+// SIDEBAR MOBILE
+// ===========================
+function toggleSidebarMobile(force){
+    const sb=document.getElementById('sidebar');
+    const ov=document.getElementById('mobileOverlay');
+    const isOpen = force!==undefined?force:!sb.classList.contains('open');
+    sb.classList.toggle('open',isOpen);
+    ov.classList.toggle('show',isOpen);
+}
+function closeMobileSidebar(){
+    if(window.innerWidth<=768){
+        const sb=document.getElementById('sidebar');
+        const ov=document.getElementById('mobileOverlay');
+        sb.classList.remove('open');
+        ov.classList.remove('show');
+    }
+}
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded',()=>{
+    conversations=loadConvs();
+    renderConvList();
+    if(conversations.length){
+        selectConversation(conversations[0].id);
+    }else{
+        showEmpty();
+        newConversation();
+    }
+    updateSidebarInfo();
+    const status=document.getElementById('sidebarStatus');
+    if(apiKey&&apiKey!==DEFAULT_API_KEY){
+        status.textContent='OpenRouter AI';
+        status.style.color='var(--green)';
+    }else{
+        status.textContent='OpenRouter (key mặc định)';
+        status.style.color='var(--green)';
+    }
+    textarea.focus();
+});
+
+// Expose for inline handlers
+window.copyCode=copyCode;
+window.newConversation=newConversation;
+window.deleteConversation=deleteConversation;
+window.selectConversation=selectConversation;
+window.openSettings=openSettings;
+window.closeSettings=closeSettings;
+window.saveSettings=saveSettings;
+window.resetAll=resetAll;
+window.sendMessage=sendMessage;
+window.useSuggestion=useSuggestion;
+window.toggleSidebarMobile=toggleSidebarMobile;
+</script>
+</body>
+</html>

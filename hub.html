@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 GitHub Mastery Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+            --text:#e6edf3;--text2:#8b949e;--text3:#5c6770;
+            --accent:#58a6ff;--purple:#bc8cff;--pink:#f778ba;
+            --green:#3fb950;--red:#f85149;--orange:#d29922;--cyan:#39d2c0;
+            --gradient:linear-gradient(135deg,#58a6ff,#bc8cff,#f778ba);
+        }
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;gap:1.2rem;flex-wrap:wrap}
+        .nav a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav a:hover{color:var(--text)}
+        .nav .spacer{flex:1}
+        .nav .logo{font-size:1.2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+        main{margin-top:60px;padding:2rem;max-width:1050px;margin-left:auto;margin-right:auto}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+        .hero{display:flex;align-items:center;gap:2.5rem;background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(188,140,255,.08),rgba(247,120,186,.06));border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:1.5rem;flex-wrap:wrap;animation:fadeUp .4s ease}
+        .hero-ring{width:150px;height:150px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .hero-ring::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--pink) calc(var(--p)*1%),var(--bg3) 0);mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 15px));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 15px),#000 calc(100% - 15px))}
+        .hero-ring .num{font-size:2.2rem;font-weight:900}
+        .hero-ring .lbl{font-size:.72rem;color:var(--text2);text-align:center}
+        .hero-info{flex:1;min-width:260px}
+        .hero-info h1{font-size:2rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem}
+        .hero-info p{color:var(--text2);font-size:.95rem}
+        .hero-info .hero-title{font-size:1.15rem;font-weight:700;margin-top:1rem;color:var(--text)}
+        .hero-badges{display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+        .h-badge{font-size:.72rem;padding:.35rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--bg3)}
+        .h-badge .b-val{color:var(--accent);font-weight:700}
+
+        .section-label{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin:1.5rem 0 .8rem}
+        .module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+        .module-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.3rem;cursor:pointer;text-decoration:none;color:var(--text);transition:all .3s;position:relative;overflow:hidden;animation:fadeUp .4s ease both}
+        .module-card:nth-child(1){animation-delay:.05s}
+        .module-card:nth-child(2){animation-delay:.1s}
+        .module-card:nth-child(3){animation-delay:.15s}
+        .module-card:nth-child(4){animation-delay:.2s}
+        .module-card:nth-child(5){animation-delay:.25s}
+        .module-card:nth-child(6){animation-delay:.3s}
+        .module-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 8px 30px rgba(88,166,255,.12)}
+        .module-card .mc-ic{font-size:1.7rem;margin-bottom:.5rem}
+        .module-card .mc-name{font-weight:700;font-size:1.02rem;margin-bottom:.2rem}
+        .module-card .mc-desc{font-size:.78rem;color:var(--text2)}
+        .module-card .mc-progress{position:absolute;bottom:0;left:0;right:0;background:var(--bg3);height:4px}
+        .module-card .mc-progress .fill{height:100%;background:var(--gradient)}
+        .module-card .mc-stat{position:absolute;top:.9rem;right:.9rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text3)}
+        .module-card .mc-go{position:absolute;bottom:1rem;right:1.15rem;font-size:1rem;color:var(--text3);transition:all .3s}
+        .module-card:hover .mc-go{color:var(--accent);transform:translateX(3px)}
+
+        .cert-shell{margin-top:1.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;animation:fadeUp .4s ease}
+        .cert-shell .cs-title{font-size:1.1rem;font-weight:800;margin-bottom:1rem}
+        .cert-thumb{border:2px dashed var(--border);border-radius:12px;padding:1.5rem;max-width:520px;margin:0 auto 1rem;opacity:.45;filter:saturate(.4)}
+        .cert-thumb:not(.locked){opacity:1;filter:none;border-style:solid;border-color:var(--orange)}
+        .cert-thumb .ct-small{font-family:'Playfair Display',serif;font-size:1.1rem;letter-spacing:4px;color:var(--accent)}
+        .cert-thumb .ct-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;margin:.4rem 0}
+        .cert-thumb .ct-body{font-size:.8rem;color:var(--text2)}
+        .cert-thumb.locked .ct-name{height:1.6rem;background:var(--bg3);border-radius:4px;width:60%;margin-left:auto;margin-right:auto}
+        .cs-unlock{font-size:.95rem;color:var(--text2);margin-bottom:.8rem}
+        .btn-primary{padding:.7rem 1.5rem;border-radius:9px;border:1px solid var(--accent);background:rgba(88,166,255,.12);color:var(--accent);cursor:pointer;font-weight:700;font-size:.9rem;transition:all .3s}
+        .btn-primary:hover{background:var(--accent);color:#000}
+        .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+
+        /* Certificate modal */
+        .cert-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+        .cert-modal.open{display:flex}
+        .cert-paper{width:820px;max-width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;animation:fadeUp .3s ease}
+        .cert-paper::before{content:'';position:absolute;inset:10px;border:2px solid rgba(210,153,34,.5);border-radius:12px;pointer-events:none}
+        .cert-paper::after{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,rgba(210,153,34,.14),transparent 40%,transparent 60%,rgba(255,215,0,.12));pointer-events:none}
+        .cert-inner{position:relative;text-align:center;padding:1rem}
+        .cert-inner .c-badge{font-size:3.5rem;margin-bottom:.5rem}
+        .cert-inner .c-kicker{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--orange);letter-spacing:6px}
+        .cert-inner .c-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;line-height:1.2;margin:.4rem 0;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .cert-inner .c-sub{color:var(--text2);font-size:.9rem}
+        .cert-inner .c-name-label{color:var(--text2);font-size:.8rem;margin-top:1.4rem;text-transform:uppercase;letter-spacing:2px}
+        .cert-inner .c-name{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:800;color:var(--text);border-bottom:2px solid var(--border);display:inline-block;padding:0 1.5rem;min-width:280px}
+        .cert-inner .c-was{color:var(--text2);font-size:.9rem;margin-top:.9rem}
+        .cert-inner .c-footer{display:flex;justify-content:space-between;margin-top:1.6rem;gap:2rem}
+        .cert-inner .cf-col{font-size:.75rem;color:var(--text3);border-top:1px solid var(--border);padding-top:.4rem;flex:1}
+        .cert-inner .cf-col b{display:block;color:var(--text2);font-size:.8rem}
+        .cert-actions{display:flex;justify-content:center;gap:.7rem;margin-top:1.2rem}
+        .btn-secondary{padding:.7rem 1.5rem;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-weight:600;font-size:.85rem;transition:all .3s}
+        .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+        .cert-name-input{display:none;margin-top:.8rem}
+        .cert-name-input.open{display:block}
+        .cert-name-input input{padding:.6rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);width:min(360px,90%);font-size:.95rem;text-align:center}
+
+        .footer{text-align:center;padding:2rem;color:var(--text2);font-size:.78rem;border-top:1px solid var(--border);margin-top:2rem}
+
+        @media print{
+            body *{visibility:hidden}
+            .cert-modal{position:fixed;inset:0;display:flex;background:#fff}
+            .cert-paper,.cert-paper *{visibility:visible}
+            .cert-paper{background:#fff;color:#000;border:2px solid #d29922;width:100%}
+            .cert-paper::before,.cert-paper::after{display:none}
+            .cert-actions,.cert-name-input{display:none !important}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="logo">🏠 GitHub Mastery</span>
+    <a href="guide.html" style="color:var(--orange)">🧭 Lộ trình</a>
+    <a href="index.html">Playbook</a>
+    <a href="flashcards.html">Flashcard</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="progress.html">Tiến độ chi tiết</a>
+    <a href="deploy.html">Deploy</a>
+    <a href="chat.html">Chat AI</a>
+</nav>
+
+<main>
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-ring" id="heroRing" style="--p:0">
+            <div style="text-align:center">
+                <div class="num" id="heroPct">0%</div>
+                <div class="lbl">khóa học</div>
+            </div>
+        </div>
+        <div class="hero-info">
+            <h1>Chào mừng đến GitHub Mastery</h1>
+            <p>Hệ thống tự học GitHub toàn diện: từ điển, playbook, mô phỏng lệnh, luyện gõ, flashcards, quiz, AI tutor và triển khai thật.</p>
+            <div class="hero-title" id="heroLevel">🌱 Người mới bắt đầu</div>
+            <div class="hero-badges" id="heroBadges"></div>
+        </div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="section-label">📚 Các mô-đun học tập</div>
+    <div class="module-grid">
+        <a class="module-card" href="guide.html" style="border-color:var(--orange)">
+            <span class="mc-ic">🧭</span>
+            <div class="mc-name">Lộ trình cho người mới</div>
+            <div class="mc-desc">8 bước đi từ con số 0 → GitHub Developer</div>
+            <span class="mc-stat" id="guideStat">0/8 bước</span>
+            <div class="mc-progress"><div class="fill" id="guideFill" style="width:0%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="index.html">
+            <span class="mc-ic">🧭</span>
+            <div class="mc-name">Playbook chính</div>
+            <div class="mc-desc">Từ điển Git, kịch bản, checklist</div>
+            <span class="mc-stat">6 sections</span>
+            <div class="mc-progress"><div class="fill" style="width:100%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="index.html#dashboard">
+            <span class="mc-ic">⌨️</span>
+            <div class="mc-name">Terminal mô phỏng</div>
+            <div class="mc-desc">Gõ lệnh GitHub thật trong giả lập</div>
+            <span class="mc-stat">7 kịch bản</span>
+            <div class="mc-progress"><div class="fill" style="width:100%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="index.html#dashboard" id="cardPractice">
+            <span class="mc-ic">🎯</span>
+            <div class="mc-name">Luyện gõ thực chiến</div>
+            <div class="mc-desc">Gõ chính xác git/gh từng ký tự</div>
+            <span class="mc-stat" id="practiceStat">0/5 bài</span>
+            <div class="mc-progress"><div class="fill" id="practiceFill" style="width:0%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="flashcards.html">
+            <span class="mc-ic">🃏</span>
+            <div class="mc-name">Flashcards</div>
+            <div class="mc-desc">Spaced repetition, kế hoạch 7 ngày</div>
+            <span class="mc-stat" id="flashStat">0/50 thẻ</span>
+            <div class="mc-progress"><div class="fill" id="flashFill" style="width:0%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="quiz.html">
+            <span class="mc-ic">📝</span>
+            <div class="mc-name">Quiz kiểm tra</div>
+            <div class="mc-desc">34 câu hỏi, 5 chủ đề, chấm điểm</div>
+            <span class="mc-stat" id="quizStat">0/5 chủ đề</span>
+            <div class="mc-progress"><div class="fill" id="quizFill" style="width:0%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+        <a class="module-card" href="deploy.html">
+            <span class="mc-ic">🚀</span>
+            <div class="mc-name">Deploy & Docker</div>
+            <div class="mc-desc">VPS/AWS/Docker + CI/CD thật</div>
+            <span class="mc-stat" id="deployStat">0/14 bước</span>
+            <div class="mc-progress"><div class="fill" id="deployFill" style="width:0%"></div></div>
+            <span class="mc-go">→</span>
+        </a>
+    </div>
+
+    <!-- CERTIFICATE -->
+    <div class="cert-shell">
+        <div class="cs-title">🎓 Chứng chỉ hoàn thành khóa học</div>
+        <div class="cert-thumb locked" id="certThumb">
+            <div class="ct-small">GITHUB MASTERY</div>
+            <div class="ct-name" id="certThumbName">Tên của bạn</div>
+            <div class="ct-body">đã hoàn thành xuất sắc khóa học GitHub toàn diện</div>
+        </div>
+        <div class="cs-unlock" id="certUnlockInfo">⛔ Chưa mở khóa — đạt <strong>100%</strong> tiến độ khóa học để nhận chứng chỉ</div>
+        <button class="btn-primary" id="certBtn" onclick="openCert()" disabled>🔓 Mở chứng chỉ</button>
+    </div>
+</main>
+
+<footer class="footer">GitHub Mastery Hub • Data được lưu tự động trên máy bạn (localStorage)</footer>
+
+<!-- CERTIFICATE MODAL -->
+<div class="cert-modal" id="certModal" onclick="if(event.target===this)closeCert()">
+    <div class="cert-paper">
+        <div class="cert-inner">
+            <div class="c-badge">🏆</div>
+            <div class="c-kicker">GITHUB MASTERY</div>
+            <div class="c-title">Chứng chỉ hoàn thành</div>
+            <div class="c-sub">Khóa học GitHub toàn diện — Git cơ bản → GitHub CLI → Actions → Deploy thật</div>
+            <div class="c-name-label">Được trao cho</div>
+            <div class="c-name" id="certName">Tên của bạn</div>
+            <div class="c-was">đã hoàn thành <strong id="certPct">100%</strong> toàn bộ chương trình học</div>
+            <div class="c-footer">
+                <div class="cf-col"><b id="certDate">Ngày</b>hoàn thành</div>
+                <div class="cf-col"><b id="certModules">6 mô-đun</b>đã trải nghiệm</div>
+                <div class="cf-col"><b id="certLevel">Bậc thầy GitHub</b>cấp độ đạt được</div>
+            </div>
+            <div class="cert-name-input" id="certNameInput">
+                <input id="certNameField" placeholder="Nhập tên hiển thị..." onkeydown="if(event.key==='Enter')saveCertName()">
+                <div><button class="btn-secondary" onclick="saveCertName()" style="margin-top:.5rem">Lưu tên</button></div>
+            </div>
+            <div class="cert-actions">
+                <button class="btn-secondary" onclick="editCertName()">✏️ Đổi tên</button>
+                <button class="btn-primary" onclick="window.print()">🖨️ In / Lưu PDF</button>
+                <button class="btn-secondary" onclick="closeCert()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===========================
+// DATA COLLECTION (all modules)
+// ===========================
+function readJSON(key,fb){
+    try{const v=localStorage.getItem(key);return v?JSON.parse(v):fb;}catch(e){return fb;}
+}
+
+function collect(){
+    // Flashcards
+    const fc=readJSON('fc_progress',{});
+    let learned=0;
+    Object.keys(fc).forEach(k=>{if(fc[k]&&fc[k].ease>0)learned++;});
+    const fcTotal=50;
+    let fcPct=Math.round(learned/fcTotal*100);
+
+    // Plan
+    const plan=readJSON('fc_plan_tasks',{});
+    let planDone=0,planTotal=0;
+    for(let i=0;i<7;i++){
+        const t=plan[i]||[];
+        if(t&&t.length){planDone+=t.filter(Boolean).length;planTotal+=t.length;}
+    }
+    if(!planTotal)planTotal=42;
+    let planPct=Math.round(planDone/planTotal*100);
+
+    // Quiz
+    const quiz=readJSON('quiz_best',{});
+    const quizNames=['Git cơ bản','GitHub CLI','Issue & PR','Actions & CI','Quy trình'];
+    let quizDone=0;
+    let quizSum=0;
+    quizNames.forEach((n,i)=>{if(quiz[i]!==undefined){quizDone++;quizSum+=quiz[i];}});
+    let quizPct=quizDone?Math.round(quizSum/(quizDone*100)*100):0;
+
+    // Practice
+    const practice=readJSON('gh_practice',{});
+    const pracDone=Object.keys(practice).filter(k=>practice[k]&&practice[k].completed).length;
+    let pracPct=Math.round(pracDone/5*100);
+
+    // Deploy
+    const deploy=readJSON('gh_deploy_tasks',{});
+    const deployDone=Object.values(deploy).filter(Boolean).length;
+    const deployTotal=14;
+    let deployPct=Math.round(deployDone/deployTotal*100);
+
+    // Guide
+    const guideManual=readJSON('gh_guide_tasks',{});
+    let guideDone=0;
+    const guideAuto={1:'gh_practice',2:'fc_progress',3:'quiz_best',5:'gh_chat_history',7:'gh_deploy_tasks'};
+    for(let i=0;i<8;i++){
+        let ad=false;
+        const auto=guideAuto[i];
+        if(auto){
+            const data=readJSON(auto,{});
+            if(auto==='gh_practice')ad=data&&Object.keys(data).some(k=>data[k]&&data[k].completed);
+            else if(auto==='gh_chat_history'){const c=readJSON('gh_convs',[]);ad=(Array.isArray(data)&&data.length>0)||(Array.isArray(c)&&c.some(x=>x.messages&&x.messages.some(m=>m.role==='user')));}
+            else ad=data&&Object.keys(data).length>0;
+        }
+        if(ad||guideManual[i])guideDone++;
+    }
+    let guidePct=Math.round(guideDone/8*100);
+
+    // Overall: 6 modules
+    const overall=Math.round((fcPct+planPct+quizPct+pracPct+deployPct+guidePct)/6);
+
+    return {learned,fcTotal,fcPct,planDone,planTotal,planPct,quizDone,quizSum,quizPct,pracDone,pracPct,deployDone,deployTotal,deployPct,guideDone,guidePct,overall};
+}
+
+// ===========================
+// RENDER
+// ===========================
+function levelText(o){
+    if(o>=100)return {t:'👑 Bậc thầy GitHub',cs:'Bậc thầy GitHub'};
+    if(o>=85)return {t:'🚀 Thành thạo',cs:'Thành thạo'};
+    if(o>=60)return {t:'📖 Khá vững',cs:'Khá vững'};
+    if(o>=35)return {t:'🌱 Đang tiến bộ',cs:'Đang tiến bộ'};
+    return {t:'✨ Khởi đầu',cs:'Người mới'};
+}
+
+function render(){
+    const d=collect();
+    const ring=document.getElementById('heroRing');
+    ring.style.setProperty('--p',d.overall);
+    document.getElementById('heroPct').textContent=d.overall+'%';
+    const lvl=levelText(d.overall);
+    document.getElementById('heroLevel').textContent=lvl.t;
+
+    document.getElementById('heroBadges').innerHTML=
+        `<span class="h-badge">🧭 Guide <b class="b-val">${d.guidePct}%</b></span>`+
+        `<span class="h-badge">🃏 Flash <b class="b-val">${d.fcPct}%</b></span>`+
+        `<span class="h-badge">🗓️ Plan <b class="b-val">${d.planPct}%</b></span>`+
+        `<span class="h-badge">📝 Quiz <b class="b-val">${d.quizPct}%</b></span>`+
+        `<span class="h-badge">🎯 Practice <b class="b-val">${d.pracPct}%</b></span>`+
+        `<span class="h-badge">🚀 Deploy <b class="b-val">${d.deployPct}%</b></span>`;
+
+    // module cards
+    document.getElementById('guideStat').textContent=d.guideDone+'/8 bước';
+    document.getElementById('guideFill').style.width=d.guidePct+'%';
+    document.getElementById('flashStat').textContent=d.learned+'/'+d.fcTotal+' thẻ';
+    document.getElementById('flashFill').style.width=d.fcPct+'%';
+    document.getElementById('practiceStat').textContent=d.pracDone+'/5 bài';
+    document.getElementById('practiceFill').style.width=d.pracPct+'%';
+    document.getElementById('quizStat').textContent=d.quizDone+'/5 chủ đề';
+    document.getElementById('quizFill').style.width=d.quizPct+'%';
+    document.getElementById('deployStat').textContent=d.deployDone+'/'+d.deployTotal+' bước';
+    document.getElementById('deployFill').style.width=d.deployPct+'%';
+
+    // certificate
+    const unlocked=d.overall>=100;
+    const thumb=document.getElementById('certThumb');
+    const btn=document.getElementById('certBtn');
+    if(unlocked){
+        thumb.classList.remove('locked');
+        document.getElementById('certUnlockInfo').innerHTML='🎉 <strong>Chúc mừng!</strong> Bạn đã hoàn thành 100% khóa học. Mở chứng chỉ ngay!';
+        btn.disabled=false;
+        btn.textContent='🏆 Nhận chứng chỉ của bạn';
+    }else{
+        thumb.classList.add('locked');
+        btn.disabled=true;
+        btn.textContent='🔒 Hoàn thành 100% để mở khóa';
+    }
+}
+
+// ===========================
+// CERTIFICATE
+// ===========================
+function openCert(){
+    const d=collect();
+    if(d.overall<100)return;
+    let name=localStorage.getItem('gh_cert_name');
+    document.getElementById('certName').textContent=name||'Tên của bạn';
+    document.getElementById('certPct').textContent=d.overall+'%';
+    const lvl=levelText(d.overall);
+    document.getElementById('certLevel').textContent=lvl.cs;
+    document.getElementById('certModules').textContent='7 mô-đun';
+    const today=new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById('certDate').textContent=today;
+    document.getElementById('certThumbName').textContent=name||'Tên của bạn';
+    document.getElementById('certModal').classList.add('open');
+}
+
+function closeCert(){document.getElementById('certModal').classList.remove('open');}
+function editCertName(){
+    const wrap=document.getElementById('certNameInput');
+    wrap.classList.toggle('open');
+    const existing=localStorage.getItem('gh_cert_name')||'';
+    document.getElementById('certNameField').value=existing;
+    if(wrap.classList.contains('open'))document.getElementById('certNameField').focus();
+}
+function saveCertName(){
+    const val=document.getElementById('certNameField').value.trim();
+    if(val&&val.length>=2){
+        localStorage.setItem('gh_cert_name',val);
+        document.getElementById('certName').textContent=val;
+        document.getElementById('certThumbName').textContent=val;
+        document.getElementById('certNameInput').classList.remove('open');
+    }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCert();});
+
+document.addEventListener('DOMContentLoaded',()=>{
+    render();
+    let saved=localStorage.getItem('gh_cert_name');
+    if(saved){
+        document.getElementById('certThumbName').textContent=saved;
+        document.getElementById('certName').textContent=saved;
+    }
+});
+</script>
+</body>
+</html>

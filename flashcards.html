@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard - Kế hoạch học GitHub toàn diện</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+            --text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--green:#3fb950;
+            --red:#f85149;--orange:#d29922;--purple:#bc8cff;--pink:#f778ba;
+            --cyan:#39d2c0;--gradient:linear-gradient(135deg,#58a6ff,#bc8cff,#f778ba);
+        }
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        /* NAV */
+        .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;gap:1.5rem}
+        .nav a{color:var(--text2);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .3s}
+        .nav a:hover{color:var(--text)}
+        .nav .spacer{flex:1}
+        .nav .logo{font-size:1.2rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);background:rgba(88,166,255,.1);color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .3s}
+        .nav .btn:hover{background:var(--accent);color:#000}
+
+        main{margin-top:60px;padding:2rem;max-width:1100px;margin-left:auto;margin-right:auto}
+
+        /* HERO / HEADER */
+        .page-head{text-align:center;padding:1.5rem 0 2.5rem}
+        .page-head .badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:.4rem 1rem;font-size:.8rem;color:var(--text2);margin-bottom:1rem}
+        .page-head .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+        .page-head h1{font-size:2.6rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.7rem}
+        .page-head p{color:var(--text2);max-width:640px;margin:0 auto;font-size:1rem}
+
+        /* TABS */
+        .study-tabs{display:flex;justify-content:center;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap}
+        .study-tab{padding:.55rem 1.3rem;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .3s;display:flex;align-items:center;gap:.4rem}
+        .study-tab:hover{color:var(--text);border-color:var(--accent)}
+        .study-tab.active{background:rgba(88,166,255,.15);color:var(--accent);border-color:var(--accent)}
+        .tab-panel{display:none;animation:fadeUp .4s ease}
+        .tab-panel.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ===== STUDY PLAN ===== */
+        .plan-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.7rem;margin-bottom:1.5rem}
+        @media(max-width:800px){.plan-grid{grid-template-columns:repeat(2,1fr)}}
+        .day-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+        .day-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+        .day-card .day-num{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:700}
+        .day-card .day-title{font-size:.85rem;font-weight:700;margin:.3rem 0}
+        .day-card .day-icon{font-size:1.4rem;margin:.3rem 0}
+        .day-card .day-progress{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:.5rem}
+        .day-card .day-progress .fill{height:100%;border-radius:3px;background:var(--gradient);width:0;transition:width .6s}
+        .day-card .day-status{position:absolute;top:.5rem;right:.6rem;font-size:.8rem}
+        .day-card .task-count{font-size:.68rem;color:var(--text2)}
+        .day-card.completed{border-color:rgba(63,185,80,.4)}
+        .day-card.completed .day-icon{animation:pulse 1s infinite}
+
+        .plan-detail{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+        .plan-detail h3{display:flex;align-items:center;gap:.6rem;font-size:1.15rem;margin-bottom:1rem}
+        .plan-detail .task{display:flex;align-items:center;gap:.8rem;padding:.6rem;border-radius:8px;cursor:pointer;transition:background .2s;margin-bottom:2px}
+        .plan-detail .task:hover{background:var(--bg3)}
+        .plan-detail .task .check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;font-size:.75rem;color:#000}
+        .plan-detail .task.done .check{background:var(--green);border-color:var(--green)}
+        .plan-detail .task.done .t-text{text-decoration:line-through;opacity:.55}
+        .plan-detail .task .t-text{flex:1;font-size:.9rem}
+        .plan-detail .task .t-cmd{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--green);background:var(--bg);border:1px solid var(--border);padding:2px 8px;border-radius:6px}
+
+        /* ===== FLASHCARD ===== */
+        .deck-filter{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+        .deck-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1.1rem;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:.8rem;transition:all .3s}
+        .deck-chip:hover{border-color:var(--accent);color:var(--text)}
+        .deck-chip.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+        .deck-chip .count{background:rgba(255,255,255,.15);padding:0 7px;border-radius:8px;font-size:.7rem}
+        .deck-chip.active .count{background:rgba(0,0,0,.2)}
+
+        .fc-stats{display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem}
+        .fc-stat{text-align:center}
+        .fc-stat .num{font-size:1.8rem;font-weight:800;color:var(--accent)}
+        .fc-stat .label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+
+        .fc-stage{max-width:720px;margin:0 auto 1.5rem;text-align:center}
+        .fc-progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+        .fc-progress-top .t{font-size:.8rem;color:var(--text2)}
+        .fc-progress-track{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-bottom:1.5rem}
+        .fc-progress-track .fill{height:100%;background:var(--gradient);border-radius:4px;transition:width .4s ease}
+
+        /* CARDS 3D flip */
+        .fc-card-container{perspective:1400px;margin:0 auto;max-width:640px;cursor:pointer;height:340px;position:relative}
+        .fc-card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,.2,.2,1)}
+        .fc-card-container.flipped .fc-card-inner{transform:rotateY(180deg)}
+        .fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+        .fc-front{background:var(--bg2);border:1px solid var(--border)}
+        .fc-front .fc-deck-tag{position:absolute;top:1rem;left:1rem;display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .8rem;border-radius:12px;background:rgba(88,166,255,.12);color:var(--accent);font-size:.72rem;font-weight:600}
+        .fc-front .fc-q-label{position:absolute;top:1rem;right:1rem;font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border:1px solid var(--border);padding:.2rem .7rem;border-radius:10px}
+        .fc-front .front-content{font-size:1.7rem;font-weight:700;text-align:center;line-height:1.5;word-break:break-word}
+        .fc-front .front-sub{color:var(--text2);margin-top:1rem;font-size:.85rem;font-family:'JetBrains Mono',monospace}
+        .fc-front .flip-hint{position:absolute;bottom:1rem;font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:.3rem}
+        .fc-back{background:var(--bg2);border:1px solid var(--accent);transform:rotateY(180deg);align-items:flex-start;justify-content:flex-start;overflow-y:auto}
+        .fc-back .back-content{width:100%;font-size:.95rem;line-height:1.8;color:var(--text)}
+        .fc-back .back-content code{background:var(--bg);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em;color:var(--green)}
+        .fc-back .back-content pre{background:var(--bg);border:1px solid var(--border);padding:.8rem;border-radius:10px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#d6e2ff;margin:.5rem 0;white-space:pre-wrap}
+        .fc-back .back-content strong{color:#fff}
+        .fc-back .back-content .tip{background:rgba(210,153,34,.1);border-left:3px solid var(--orange);padding:.5rem .9rem;border-radius:0 8px 8px 0;font-size:.85rem;color:var(--orange);margin:.5rem 0}
+
+        /* Rating buttons */
+        .fc-actions{display:flex;justify-content:center;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap}
+        .rate-btn{padding:.65rem 1.5rem;border-radius:12px;border:none;cursor:pointer;font-size:.85rem;font-weight:700;transition:all .3s;display:flex;align-items:center;gap:.4rem}
+        .rate-btn:disabled{opacity:.3;cursor:not-allowed;transform:none!important}
+        .rate-again{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+        .rate-again:hover:not(:disabled){background:var(--red);color:#000}
+        .rate-hard{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.3)}
+        .rate-hard:hover:not(:disabled){background:var(--orange);color:#000}
+        .rate-good{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3)}
+        .rate-good:hover:not(:disabled){background:var(--accent);color:#000}
+        .rate-easy{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+        .rate-easy:hover:not(:disabled){background:var(--green);color:#000}
+
+        .fc-empty{text-align:center;padding:3rem 1rem;color:var(--text2)}
+        .fc-empty .big-ic{font-size:3rem;margin-bottom:1rem}
+        .fc-empty .btn{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;padding:.7rem 1.4rem;border-radius:10px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:.85rem;font-weight:700;transition:all .3s}
+        .fc-empty .btn:hover{filter:brightness(1.1)}
+
+        /* Session done */
+        .fc-done{text-align:center;padding:2rem 1rem}
+        .fc-done .done-ic{font-size:4rem;animation:pulse 1.5s infinite;margin-bottom:1rem}
+        .fc-done h3{font-size:1.5rem;margin-bottom:.5rem}
+        .fc-done p{color:var(--text2);margin-bottom:1.5rem}
+        .fc-done .stats-row{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem}
+        .fc-done .stats-row .s{text-align:center}
+        .fc-done .stats-row .n{font-size:2rem;font-weight:800}
+        .fc-done .stats-row .l{font-size:.75rem;color:var(--text2)}
+
+        .footer{text-align:center;padding:2rem;color:var(--text2);font-size:.78rem;border-top:1px solid var(--border);margin-top:2rem}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="logo">📚 GitHub Mastery</span>
+    <a href="guide.html" style="color:var(--orange)">🧭 Lộ trình</a>
+    <a href="index.html">Trang chủ</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="deploy.html">Deploy</a>
+    <a href="progress.html">Tiến độ</a>
+    <a href="chat.html">Chat AI</a>
+    <div class="spacer"></div>
+    <a class="btn" href="hub.html">🏠 Hub</a>
+</nav>
+
+<main>
+    <div class="page-head">
+        <div class="badge"><span class="dot"></span> Kế hoạch học toàn diện • Học mọi lúc, mọi nơi</div>
+        <h1>Flashcard & Kế Hoạch Học GitHub</h1>
+        <p>Hệ thống thẻ ghi nhớ thông minh (kiểu Anki) kết hợp kế hoạch 7 ngày. Lật thẻ, tự đánh giá độ nhớ, tiến độ lưu tự động.</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="study-tabs">
+        <button class="study-tab active" onclick="switchTab('plan',this)">🗓️ Kế hoạch</button>
+        <button class="study-tab" onclick="switchTab('flashcards',this)">🃏 Flashcard</button>
+    </div>
+
+    <!-- ===== TAB: STUDY PLAN ===== -->
+    <div class="tab-panel active" id="tab-plan">
+        <div class="plan-grid" id="planGrid"></div>
+        <div class="plan-detail" id="planDetail"></div>
+    </div>
+
+    <!-- ===== TAB: FLASHCARDS ===== -->
+    <div class="tab-panel" id="tab-flashcards">
+        <div class="deck-filter" id="deckFilter"></div>
+
+        <div class="fc-stats" id="fcStats"></div>
+
+        <div class="fc-stage" id="fcStage">
+            <!-- populated by JS -->
+        </div>
+    </div>
+</main>
+
+<footer class="footer">GitHub Mastery Interactive • Flashcard system • Báo cáo GitHub toàn diện 06/09/2026</footer>
+
+<script>
+// ===========================
+// STUDY PLAN DATA
+// ===========================
+const PLAN=[
+    {day:'Ngày 1',title:'Nền tảng',color:'#58a6ff',icon:'🧭',tasks:[
+        {t:'Tạo tài khoản GitHub tại github.com',c:''},
+        {t:'Cài đặt Git (git-scm.com)',c:''},
+        {t:'Cài đặt GitHub CLI: brew install gh',c:'brew install gh'},
+        {t:'Đăng nhập GitHub CLI',c:'gh auth login'},
+        {t:'Tạo repo đầu tiên + README',c:'gh repo create hello-world --public --source=. --push'},
+        {t:'Push code lần đầu lên GitHub',c:'git add . && git commit -m "init" && git push'},
+    ]},
+    {day:'Ngày 2',title:'Git cơ bản',color:'#3fb950',icon:'⌨️',tasks:[
+        {t:'Tạo nhánh mới & chuyển nhánh',c:'git checkout -b feature/dang-nhap'},
+        {t:'Xem trạng thái & thay đổi',c:'git status && git diff'},
+        {t:'Add + Commit đúng cách',c:'git add . && git commit -m "feat: login"'},
+        {t:'Push & Pull code',c:'git push origin feature/dang-nhap && git pull origin main'},
+        {t:'Xem lịch sử commit',c:'git log --oneline -10'},
+        {t:'Gộp nhánh vào main',c:'git merge feature/dang-nhap'},
+    ]},
+    {day:'Ngày 3',title:'Issue & Label',color:'#d29922',icon:'📋',tasks:[
+        {t:'Tạo issue bug',c:'gh issue create --title "Bug: Login fails" --label bug'},
+        {t:'Tạo issue feature',c:'gh issue create --title "Feature: Dark mode" --label enhancement'},
+        {t:'Xem danh sách issue mở',c:'gh issue list --state open'},
+        {t:'Xem chi tiết issue',c:'gh issue view 123 --comments'},
+        {t:'Bình luận vào issue',c:'gh issue comment 123 --body "Dang fix..."'},
+        {t:'Đóng issue',c:'gh issue close 123 --comment "Fixed in PR #456"'},
+    ]},
+    {day:'Ngày 4',title:'Pull Request',color:'#bc8cff',icon:'🔀',tasks:[
+        {t:'Tạo PR đóng issue tự động',c:'gh pr create --title "Fix login" --body "Closes #123"'},
+        {t:'Xem danh sách PR',c:'gh pr list --state open'},
+        {t:'Xem diff của PR',c:'gh pr diff 5'},
+        {t:'Checkout PR về máy',c:'gh pr checkout 5'},
+        {t:'Review + Approve',c:'gh pr review 5 --approve --body "LGTM!"'},
+        {t:'Merge bằng squash',c:'gh pr merge 5 --squash --delete-branch'},
+    ]},
+    {day:'Ngày 5',title:'GitHub Actions',color:'#f778ba',icon:'🤖',tasks:[
+        {t:'Tạo thư mục workflow',c:'mkdir -p .github/workflows'},
+        {t:'Viết file CI (npm test)',c:'# .github/workflows/ci.yml'},
+        {t:'Xem danh sách workflow',c:'gh workflow list'},
+        {t:'Xem lần chạy Actions',c:'gh run list --workflow=CI --limit 10'},
+        {t:'Xem log thất bại',c:'gh run view <id> --log-failed'},
+        {t:'Chạy lại khi fail',c:'gh run rerun <id> --failed'},
+    ]},
+    {day:'Ngày 6',title:'Release & Secret',color:'#f85149',icon:'🚀',tasks:[
+        {t:'Tạo release v1.0.0',c:'gh release create v1.0.0 --notes "Ban dau" --generate-notes'},
+        {t:'Upload file build',c:'gh release upload v1.0.0 ./dist/app.zip'},
+        {t:'Lưu API key an toàn',c:'gh secret set API_KEY --body "sk-12345"'},
+        {t:'Lưu biến môi trường',c:'gh variable set NODE_ENV --body "production"'},
+        {t:'Xem danh sách release',c:'gh release list --limit 10'},
+        {t:'Xem danh sách secret',c:'gh secret list'},
+    ]},
+    {day:'Ngày 7',title:'Dashboard + Tổng ôn',color:'#39d2c0',icon:'🎨',tasks:[
+        {t:'Xem lại toàn bộ flashcard',c:''},
+        {t:'Làm lại bài tập ngày trước',c:''},
+        {t:'Tự tạo 1 dự án thật làm full flow',c:'branch→PR→CI→release'},
+        {t:'Thực hành 5 kịch bản',c:'# trong Dashboard'},
+        {t:'Đọc FAQ + Checklist',c:''},
+        {t:'Kiểm tra gh auth & git branch',c:'gh auth status && git branch'},
+    ]},
+];
+
+// ===========================
+// FLASHCARD DATA
+// ===========================
+const DECKS=[
+    {
+        name:'Khái niệm',
+        icon:'🧠',
+        color:'#58a6ff',
+        cards:[
+            {q:'Git là gì?',a:'Hệ thống quản lý <strong>phiên bản phân tán</strong>. Lưu lại toàn bộ lịch sử thay đổi của code.<br><div class="tip">💡 Giống Google Docs có lịch sử chỉnh sửa, nhưng cho code</div>'},
+            {q:'GitHub là gì?',a:'Nền tảng trực tuyến lưu trữ Git repo + <strong>mạng xã hội cho lập trình viên</strong>.<br><div class="tip">💡 Giống Google Drive + Facebook dành cho code</div>'},
+            {q:'Repository (repo) là gì?',a:'Thư mục dự án trên GitHub chứa code, README, config, lịch sử commit.<br><div class="tip">💡 Ví dụ repo "my-shop" chứa toàn bộ website bán hàng</div>'},
+            {q:'Commit là gì?',a:'<strong>Một "chụp ảnh" lưu lại trạng thái code</strong> tại thời điểm nhất định. Mỗi commit có message mô tả.<br><br><pre>git commit -m "Thêm màn hình đăng nhập"</pre>'},
+            {q:'Branch (nhánh) là gì?',a:'Bản sao của code để <strong>thử nghiệm mà không làm hỏng bản chính</strong> (main).<br><div class="tip">💡 Quy tắc vàng: không bao giờ sửa trực tiếp trên main!</div><br><pre>git checkout -b feature/dang-nhap</pre>'},
+            {q:'Issue là gì?',a:'<strong>Phiếu việc / báo lỗi</strong> trên GitHub. Mỗi issue có số thứ tự (#123), gán người, gắn nhãn.<br><pre>gh issue create --title "Bug: Login fails" --label bug</pre>'},
+            {q:'Pull Request (PR) là gì?',a:'Đề nghị <strong>gộp code từ nhánh phụ vào nhánh chính</strong>, được review trước khi merge.<br><div class="tip">💡 Ghi "Closes #123" trong PR để tự đóng issue khi merge</div>'},
+            {q:'Merge là gì?',a:'<strong>Gộp code</strong> từ nhánh này vào nhánh khác. Có 3 cách: merge, squash, rebase.<br><pre>gh pr merge 5 --squash --delete-branch</pre>'},
+            {q:'GitHub Actions là gì?',a:'<strong>Robot tự động</strong> của GitHub. Chạy test, build, deploy khi có push, PR, hoặc theo lịch.<br><div class="tip">💡 Bạn viết kịch bản 1 lần, robot chạy mãi mãi</div>'},
+            {q:'Fork là gì?',a:'Sao chép repo của người khác về tài khoản mình để sửa và gửi PR đóng góp.<br><pre>gh repo fork owner/repo --clone</pre>'},
+        ]
+    },
+    {
+        name:'Lệnh Git',
+        icon:'⌨️',
+        color:'#3fb950',
+        cards:[
+            {q:'git clone',a:'<strong>Tải toàn bộ repo từ GitHub về máy</strong>.<br><pre>git clone https://github.com/owner/repo.git<br>cd repo</pre><div class="tip">💡 Giống tải thư mục Drive về máy</div>'},
+            {q:'git status',a:'<strong>Xem trạng thái</strong>: file nào đang thay đổi, file nào chưa add.<br><pre>git status</pre><div class="tip">💡 Chạy trước mỗi commit để tránh lưu nhầm file .env, node_modules</div>'},
+            {q:'git log',a:'<strong>Xem lịch sử commit</strong>.<br><pre>git log --oneline -10</pre><div class="tip">💡 Hiện 10 commit gần nhất gọn gàng</div>'},
+            {q:'git diff',a:'<strong>Xem chi tiết thay đổi</strong> trước khi lưu.<br><pre>git diff            # chưa add<br>git diff --staged   # đã add</pre>'},
+            {q:'git add',a:'<strong>Chọn file muốn lưu</strong> vào vùng staging.<br><pre>git add src/file.ts<br>git add .</pre><div class="tip">💡 Nên add cụ thể file thay vì "add ." khi chưa chắc</div>'},
+            {q:'git commit',a:'<strong>Chụp ảnh lại</strong> với message mô tả.<br><pre>git commit -m "feat: thêm nút đăng nhập"</pre><div class="tip">💡 Message tốt: feat:, fix:, docs:, refactor:</div>'},
+            {q:'git push',a:'<strong>Đẩy code từ máy lên GitHub</strong>.<br><pre>git push origin feature/dang-nhap<br>git push -u origin ten-nhanh  # lần đầu</pre>'},
+            {q:'git pull',a:'<strong>Lấy code mới nhất từ GitHub về máy</strong>.<br><pre>git pull origin main</pre>'},
+            {q:'git checkout',a:'<strong>Chuyển nhánh</strong> hoặc chuyển file.<br><pre>git checkout main<br>git checkout -b ten-nhanh  # tạo + chuyển</pre>'},
+            {q:'git stash',a:'<strong>An code tạm thời</strong> để chuyển nhánh mà không mất thay đổi.<br><pre>git stash<br>git stash list<br>git stash pop</pre>'},
+            {q:'git reset',a:'<strong>Quay lại commit trước</strong>.<br><pre>git reset --soft HEAD~1   # giữ code<br>git reset --hard HEAD~1   # xóa code (cẩn thận!)</pre>'},
+            {q:'git tag',a:'<strong>Đánh nhãn phiên bản</strong>.<br><pre>git tag v1.0.0<br>git tag -a v1.0.0 -m "Phien ban dau"<br>git push origin v1.0.0</pre>'},
+        ]
+    },
+    {
+        name:'GitHub CLI',
+        icon:'🐙',
+        color:'#bc8cff',
+        cards:[
+            {q:'gh repo create',a:'<strong>Tạo repo mới trên GitHub</strong> từ thư mục hiện tại.<br><pre>gh repo create my-app --public --source=. --push</pre><div class="tip">💡 --public = ai cũng xem, --private = riêng tư</div>'},
+            {q:'gh repo clone',a:'<strong>Tải repo của người khác về máy</strong>.<br><pre>gh repo clone owner/repo</pre>'},
+            {q:'gh repo fork',a:'<strong>Sao chép repo người khác về tài khoản mình</strong>.<br><pre>gh repo fork owner/repo --clone</pre>'},
+            {q:'gh repo view',a:'<strong>Xem thông tin / mở repo trên web</strong>.<br><pre>gh repo view owner/repo<br>gh repo view owner/repo --web</pre>'},
+            {q:'gh issue create',a:'<strong>Tạo phiếu việc mới</strong>.<br><pre>gh issue create --title "Bug" --body "Chi tiet" --label bug --assignee @me</pre>'},
+            {q:'gh issue list',a:'<strong>Liệt kê danh sách issue</strong>.<br><pre>gh issue list --state open --label bug --limit 20</pre>'},
+            {q:'gh pr create',a:'<strong>Tạo Pull Request mới</strong>.<br><pre>gh pr create --title "Add login" --body "Closes #123" --base main</pre>'},
+            {q:'gh pr review',a:'<strong>Duyệt / yêu cầu sửa PR</strong>.<br><pre>gh pr review 5 --approve --body "LGTM!"<br>gh pr review 5 --request-changes</pre>'},
+            {q:'gh pr merge',a:'<strong>Merge PR</strong> (gom commit bằng squash).<br><pre>gh pr merge 5 --squash --delete-branch</pre><div class="tip">💡 3 cách merge: merge, squash (gom gọn), rebase (thẳng hàng)</div>'},
+            {q:'gh release create',a:'<strong>Tạo phiên bản phát hành</strong>.<br><pre>gh release create v1.0.0 --title "v1.0.0" --notes "Ban dau" --generate-notes</pre>'},
+            {q:'gh secret set',a:'<strong>Lưu biến mật an toàn</strong> (API key, mật khẩu).<br><pre>gh secret set API_KEY --body "sk-12345"</pre><div class="tip">⚠️ Không bao giờ ghi secret thẳng vào code!</div>'},
+            {q:'gh auth login',a:'<strong>Đăng nhập GitHub CLI</strong>.<br><pre>gh auth login<br>gh auth status  # kiểm tra đã đăng nhập chưa</pre>'},
+        ]
+    },
+    {
+        name:'Actions & CI/CD',
+        icon:'🤖',
+        color:'#f778ba',
+        cards:[
+            {q:'Workflow là gì?',a:'File YAML mô tả <strong>kịch bản robot</strong>. Đặt trong <code>.github/workflows/</code>.<br><pre>name: CI<br>on: [push, pull_request]<br>jobs:<br>  test:<br>    runs-on: ubuntu-latest</pre>'},
+            {q:'on: [push, pull_request] nghĩa là gì?',a:'Kịch bản sẽ chạy khi có <strong>push</strong> hoặc <strong>tạo PR</strong>.<br><div class="tip">💡 Nếu test fail, PR hiện dấu đỏ, không cho merge</div>'},
+            {q:'gh run list',a:'<strong>Xem danh sách các lần chạy Actions</strong>.<br><pre>gh run list --workflow=CI --limit 10</pre>'},
+            {q:'gh run view --log-failed',a:'<strong>Xem log lỗi</strong> của lần chạy thất bại.<br><pre>gh run view 123 --log-failed</pre>'},
+            {q:'gh run rerun',a:'<strong>Chạy lại các job bị fail</strong>.<br><pre>gh run rerun 123 --failed</pre>'},
+            {q:'CI/CD là gì?',a:'<strong>CI</strong> = tích hợp liên tục (chạy test tự động). <strong>CD</strong> = triển khai liên tục (deploy tự động).<br><div class="tip">💡 Push lên main → tự test → tự deploy lên Vercel</div>'},
+            {q:'Dependabot là gì?',a:'Bot tự động <strong>tạo PR nâng cấp thư viện cũ</strong>, chống lỗ hổng bảo mật.<br><div class="tip">💡 Bật trong Settings → Security</div>'},
+            {q:'Điều kiện để Actions chạy scheduled?',a:'Dùng cú pháp cron.<br><pre>on:<br>  schedule:<br>    - cron: "0 8 * * 1"  # 8h sáng thứ 2</pre>'},
+        ]
+    },
+    {
+        name:'Quy trình & Best Practice',
+        icon:'🛡️',
+        color:'#d29922',
+        cards:[
+            {q:'Quy trình feature branch chuẩn?',a:'<pre>1. git checkout main && git pull<br>2. git checkout -b feature/moi<br>3. code + commit<br>4. git push origin feature/moi<br>5. gh pr create --base main<br>6. Review → Merge → Xóa nhánh</pre>'},
+            {q:'Tại sao không nên commit trực tiếp lên main?',a:'Rủi ro <strong>hỏng code chính</strong>. Dùng branch để thử nghiệm, PR để review trước khi gộp.<br><div class="tip">💡 Khi làm nhóm, luôn có người review trước khi merge</div>'},
+            {q:'Nên dùng merge hay squash?',a:'Team nhỏ: <strong>squash</strong> (gom commit thành 1 sạch). Dự án lớn: merge (giữ lịch sử đầy đủ).<br><pre>gh pr merge 5 --squash</pre>'},
+            {q:'Làm sao tự đóng issue khi merge PR?',a:'Ghi <strong>Closes #123</strong> (hoặc Fixes #123) trong body PR.<br><pre>gh pr create --title "Fix bug" --body "Closes #123"</pre>'},
+            {q:'Những label nên dùng?',a:'<pre>bug             → Lỗi cần sửa<br>enhancement     → Tính năng mới<br>documentation   → Thiếu tài liệu<br>good first issue → Dễ, cho người mới</pre>'},
+            {q:'Những file cần có trong repo?',a:'<pre>README.md      → Hướng dẫn chạy<br>.gitignore     → Loại file rác<br>LICENSE        → Giấy phép<br>CONTRIBUTING   → Hướng dẫn đóng góp</pre>'},
+            {q:'Làm sao gửi link GitHub cho AI để được giúp?',a:'Chỉ cần đảm bảo: README có, không có secret, gh auth status OK, biết đang ở nhánh nào.<br><pre>gh auth status<br>git branch</pre>'},
+            {q:'Xóa file chứa mật khẩu đã commit lịch sử?',a:'Xoá khỏi git nhưng commit vẫn còn trong lịch sử → dùng <code>git filter-repo</code> hoặc BFG. Tốt nhất <strong>privote lại token ngay</strong>.<br><pre>brew install git-filter-repo<br>git filter-repo --path .env --invert-paths</pre>'},
+        ]
+    },
+];
+
+// ===========================
+// STATE
+// ===========================
+let currentDeck=null;       // 'all' or index
+let currentCards=[];
+let cardIdx=0;
+let sessionStats={again:0,hard:0,good:0,easy:0,total:0};
+let sessionOrder=[];
+let flipped=false;
+let studyProgress=null;
+
+// ===========================
+// STUDY PLAN
+// ===========================
+function loadPlan(){
+    const saved=JSON.parse(localStorage.getItem('fc_plan_tasks')||'{}');
+    const grid=document.getElementById('planGrid');
+    grid.innerHTML=PLAN.map((d,i)=>{
+        const tasks=saved[i]||[];
+        const doneCount=tasks.filter(Boolean).length;
+        const total=d.tasks.length;
+        const pct=Math.round(doneCount/total*100);
+        const completed=pct===100;
+        return `<div class="day-card ${completed?'completed':''}" onclick="showPlanDay(${i})">
+            ${completed?'<span class="day-status">✅</span>':''}
+            <div class="day-num">${d.day}</div>
+            <div class="day-icon">${d.icon}</div>
+            <div class="day-title">${d.title}</div>
+            <div class="task-count">${doneCount}/${total} bài</div>
+            <div class="day-progress"><div class="fill" style="width:${pct}%"></div></div>
+        </div>`;
+    }).join('');
+}
+
+function showPlanDay(idx){
+    const d=PLAN[idx];
+    const saved=JSON.parse(localStorage.getItem('fc_plan_tasks')||'{}');
+    const tasks=saved[idx]||[];
+    const detail=document.getElementById('planDetail');
+    detail.dataset.day=idx;
+    detail.innerHTML=`<h3>${d.icon} ${d.day} • ${d.title}</h3>`+
+        d.tasks.map((t,i)=>{
+            const done=tasks[i];
+            return `<div class="task ${done?'done':''}" onclick="togglePlanTask(${idx},${i})">
+                <div class="check">${done?'✓':''}</div>
+                <div class="t-text">${t.t}</div>
+                ${t.c?`<span class="t-cmd">${t.c}</span>`:''}
+            </div>`;
+        }).join('');
+    detail.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function togglePlanTask(dIdx,tIdx){
+    const saved=JSON.parse(localStorage.getItem('fc_plan_tasks')||'{}');
+    saved[dIdx]=saved[dIdx]||[];
+    saved[dIdx][tIdx]=!saved[dIdx][tIdx];
+    localStorage.setItem('fc_plan_tasks',JSON.stringify(saved));
+    if(studyProgress)studyProgress.planDone=(studyProgress.planDone||0)+(saved[dIdx][tIdx]?1:-1);
+    saveProgress();
+    loadPlan();
+    showPlanDay(dIdx);
+}
+
+// ===========================
+// FLASHCARDS
+// ===========================
+function loadProgress(){
+    const p=JSON.parse(localStorage.getItem('fc_progress')||'{}');
+    // Default progress: {cardUniqueId: {ease: 0-3, interval: days, due: timestamp}}
+    return p;
+}
+function saveProgress(){
+    localStorage.setItem('fc_progress',JSON.stringify(progress||{}));
+}
+let progress=loadProgress();
+
+function cardKey(deckIdx,cIdx){
+    return deckIdx+'_'+cIdx;
+}
+
+function renderDeckFilter(){
+    const f=document.getElementById('deckFilter');
+    let chips=`<button class="deck-chip ${currentDeck==='all'?'active':''}" onclick="setDeck('all',this)">
+        📚 Tất cả <span class="count">${totalCards()}</span></button>`;
+    DECKS.forEach((d,i)=>{
+        chips+=`<button class="deck-chip ${currentDeck===i?'active':''}" onclick="setDeck(${i},this)">
+            ${d.icon} ${d.name} <span class="count">${d.cards.length}</span></button>`;
+    });
+    f.innerHTML=chips;
+}
+function totalCards(){return DECKS.reduce((s,d)=>s+d.cards.length,0);}
+
+function setDeck(d,el){
+    currentDeck=d;
+    renderDeckFilter();
+    startSession();
+}
+
+function renderStats(){
+    // Compute learning stats
+    let learned=0,review=0;
+    DECKS.forEach((d,di)=>{
+        d.cards.forEach((_,ci)=>{
+            const p=progress[cardKey(di,ci)];
+            if(p&&p.ease>0)learned++;
+            if(p&&p.due&&p.due<=Date.now()&&p.ease>0)review++;
+        });
+    });
+    const total=totalCards();
+    document.getElementById('fcStats').innerHTML=`
+        <div class="fc-stat"><div class="num">${learned}</div><div class="label">Đã học</div></div>
+        <div class="fc-stat"><div class="num">${review}</div><div class="label">Cần ôn</div></div>
+        <div class="fc-stat"><div class="num">${total-learned}</div><div class="label">Chưa học</div></div>
+        <div class="fc-stat"><div class="num">${Math.round(learned/total*100)}%</div><div class="label">Hoàn thành</div></div>`;
+}
+
+function startSession(){
+    // Build card pool based on deck selection
+    let pool=[];
+    DECKS.forEach((d,di)=>{
+        if(currentDeck==='all'||currentDeck===di){
+            d.cards.forEach((c,ci)=>pool.push({deckIdx:di,cIdx:ci,q:c.q,a:c.a}));
+        }
+    });
+    sessionOrder=pool;
+    // Shuffle (Fisher-Yates)
+    for(let i=sessionOrder.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [sessionOrder[i],sessionOrder[j]]=[sessionOrder[j],sessionOrder[i]];
+    }
+    cardIdx=0;
+    sessionStats={again:0,hard:0,good:0,easy:0,total:sessionOrder.length};
+    flipped=false;
+    renderStats();
+    renderCard();
+}
+
+function renderCard(){
+    const stage=document.getElementById('fcStage');
+    if(cardIdx>=sessionOrder.length){
+        renderDone();
+        return;
+    }
+    const card=sessionOrder[cardIdx];
+    const deck=DECKS[card.deckIdx];
+    const doneCount=cardIdx;
+    const total=sessionOrder.length;
+    const pct=Math.round(doneCount/total*100);
+
+    stage.innerHTML=`
+        <div class="fc-progress-top">
+            <span class="t">Thẻ ${cardIdx+1}/${total}</span>
+            <span class="t">${deck.icon} ${deck.name}</span>
+        </div>
+        <div class="fc-progress-track"><div class="fill" style="width:${pct}%"></div></div>
+
+        <div class="fc-card-container" id="fcCard" onclick="flipCard()">
+            <div class="fc-card-inner">
+                <div class="fc-face fc-front">
+                    <span class="fc-deck-tag">${deck.icon} ${deck.name}</span>
+                    <span class="fc-q-label">Câu hỏi</span>
+                    <div class="front-content">${card.q}</div>
+                    <div class="flip-hint">🖱️ Click để lật thẻ</div>
+                </div>
+                <div class="fc-face fc-back">
+                    <div class="back-content">${card.a}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fc-actions">
+            <button class="rate-btn rate-again" onclick="rate('again')" id="btnAgain">🔄 Lại</button>
+            <button class="rate-btn rate-hard" onclick="rate('hard')" id="btnHard">🔁 Khó</button>
+            <button class="rate-btn rate-good" onclick="rate('good')" id="btnGood">✅ Được</button>
+            <button class="rate-btn rate-easy" onclick="rate('easy')" id="btnEasy">⚡ Dễ</button>
+        </div>`;
+}
+
+function flipCard(){
+    const c=document.getElementById('fcCard');
+    if(!c)return;
+    flipped=!flipped;
+    c.classList.toggle('flipped',flipped);
+}
+
+function rate(grade){
+    if(!flipped)return;
+    const card=sessionOrder[cardIdx];
+    const key=cardKey(card.deckIdx,card.cIdx);
+    const now=Date.now();
+    const p=progress[key]||{ease:0,interval:0,due:0};
+
+    const easeMap={again:0,hard:1,good:2,easy:3};
+    const intervalMap={again:10*60*1000,hard:24*60*60*1000,good:3*24*60*60*1000,easy:7*24*60*60*1000};
+
+    progress[key]={
+        ease:easeMap[grade],
+        interval:intervalMap[grade],
+        due:now+intervalMap[grade],
+        last:now
+    };
+    sessionStats[grade]++;
+    saveProgress();
+
+    cardIdx++;
+    flipped=false;
+    renderStats();
+    renderCard();
+}
+
+function renderDone(){
+    const s=sessionStats;
+    const stage=document.getElementById('fcStage');
+    stage.innerHTML=`
+        <div class="fc-done">
+            <div class="done-ic">🎉</div>
+            <h3>Hoàn thành buổi học!</h3>
+            <p>Đã học ${s.total} thẻ trong phiên này</p>
+            <div class="stats-row">
+                <div class="s" style="color:var(--red)"><div class="n">${s.again}</div><div class="l">Lại</div></div>
+                <div class="s" style="color:var(--orange)"><div class="n">${s.hard}</div><div class="l">Khó</div></div>
+                <div class="s" style="color:var(--accent)"><div class="n">${s.good}</div><div class="l">Được</div></div>
+                <div class="s" style="color:var(--green)"><div class="n">${s.easy}</div><div class="l">Dễ</div></div>
+            </div>
+            <button class="btn" onclick="startSession()">🔄 Học lại</button>
+            <button class="btn" style="background:var(--bg2);color:var(--text);border:1px solid var(--border)" onclick="switchTab('plan',document.querySelector('.study-tab'))">🗓️ Xem kế hoạch</button>
+        </div>`;
+}
+
+// ===========================
+// TABS
+// ===========================
+function switchTab(name,btn){
+    document.querySelectorAll('.study-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+name).classList.add('active');
+    if(name==='flashcards'){renderStats();startSession();}
+    if(name==='plan')loadPlan();
+}
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded',()=>{
+    currentDeck='all';
+    renderDeckFilter();
+    renderStats();
+    loadPlan();
+    showPlanDay(0);
+    if(location.hash==='#plan'){
+        const tab=document.querySelectorAll('.study-tab')[0];
+        switchTab('plan',tab);
+        document.getElementById('tab-plan').scrollIntoView({behavior:'smooth'});
+    }
+});
+</script>
+</body>
+</html>
