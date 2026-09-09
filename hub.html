@@ -210,6 +210,21 @@
         <div class="cs-unlock" id="certUnlockInfo">⛔ Chưa mở khóa — đạt <strong>100%</strong> tiến độ khóa học để nhận chứng chỉ</div>
         <button class="btn-primary" id="certBtn" onclick="openCert()" disabled>🔓 Mở chứng chỉ</button>
     </div>
+
+    <!-- BACKUP / STORAGE -->
+    <div class="cert-shell" style="margin-top:1.2rem" id="secBackup">
+        <div class="cs-title">💾 Lưu trữ dữ liệu</div>
+        <div class="cs-unlock" style="font-size:.85rem">
+            Toàn bộ <strong>hội thoại chat</strong> và <strong>tiến độ học</strong> được lưu tự động trong trình duyệt của bạn (localStorage).
+            Xuất ra file JSON để <strong>sao lưu</strong> hoặc <strong>chuyển sang máy/điện thoại khác</strong> — cùng tài khoản GitHub, mở cùng link là khôi phục được.
+        </div>
+        <div class="cert-actions">
+            <button class="btn-primary" onclick="exportBackup()">📤 Xuất lưu trữ (JSON)</button>
+            <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Nhập lưu trữ</button>
+            <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importBackup(event)">
+        </div>
+        <div style="margin-top:.8rem;font-size:.8rem;color:var(--text2)" id="backupStatus"></div>
+    </div>
 </main>
 
 <footer class="footer">GitHub Mastery Hub • Data được lưu tự động trên máy bạn (localStorage)</footer>
@@ -402,6 +417,60 @@ function saveCertName(){
     }
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCert();});
+
+// ===========================
+// BACKUP / RESTORE (chat + progress)
+// ===========================
+const BACKUP_KEYS=['gh_chat_apikey','gh_chat_model','gh_chat_lang','gh_chat_history',
+    'gh_apikey','gh_model','gh_lang','gh_convs',
+    'fc_plan_tasks','fc_progress','quiz_best','gh_practice','gh_deploy_tasks','gh_guide_tasks','gh_cert_name'];
+
+function setBackupStatus(msg,color){
+    const el=document.getElementById('backupStatus');
+    if(!el)return;
+    el.textContent=msg;
+    el.style.color=color||'var(--text2)';
+}
+
+function exportBackup(){
+    const data={app:'github-mastery-playbook',version:3,exportedAt:new Date().toISOString(),data:{}};
+    BACKUP_KEYS.forEach(k=>{
+        const v=localStorage.getItem(k);
+        if(v!==null)data.data[k]=v;
+    });
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='github-mastery-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+    setBackupStatus('✅ Đã tải xuống file lưu trữ. Giữ file này cẩn thận — nó chứa cả hội thoại chat của bạn.','var(--green)');
+}
+
+function importBackup(event){
+    const file=event.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+        try{
+            const parsed=JSON.parse(reader.result);
+            const store=parsed.data||parsed;
+            let count=0;
+            BACKUP_KEYS.forEach(k=>{
+                if(store[k]!==undefined&&store[k]!==null){
+                    localStorage.setItem(k,typeof store[k]==='string'?store[k]:JSON.stringify(store[k]));
+                    count++;
+                }
+            });
+            setBackupStatus(`✅ Đã khôi phục ${count} mục dữ liệu. Đang làm mới trang...`,'var(--green)');
+            setTimeout(()=>location.reload(),900);
+        }catch(e){
+            setBackupStatus('❌ File không hợp lệ: '+e.message,'var(--red)');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value='';
+}
 
 document.addEventListener('DOMContentLoaded',()=>{
     render();
